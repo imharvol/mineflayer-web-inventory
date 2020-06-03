@@ -1,5 +1,5 @@
 {
-  "name": "inventory-viewer",
+  "name": "mineflayer-web-inventory",
   "version": "1.0.0",
   "description": "Web based viewer for your mineflayer bot's inventory",
   "main": "index.js",
@@ -16,5 +16,5 @@
   "devDependencies": {
     "standard": "^14.3.4"
   },
-  "repository": "https://github.com/ImHarvol/inventory-viewer.git"
+  "repository": "https://github.com/ImHarvol/mineflayer-web-inventory.git"
 }

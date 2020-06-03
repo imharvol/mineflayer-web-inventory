@@ -1,4 +1,4 @@
-module.exports = function (bot, port=3000) {
+module.exports = function (bot, port = 3000) {
   const path = require('path')
   const express = require('express')
 
@@ -14,12 +14,15 @@ module.exports = function (bot, port=3000) {
   })
 
   io.on('connection', (socket) => {
-    const interval = setInterval(() => {
-      io.emit('inventory', bot.inventory.items())
-    }, 500)
+    socket.emit('inventory', bot.inventory.items())
+
+    function sendUpdate (slot, oldItem, newItem) {
+      socket.emit('inventoryUpdate', slot, newItem)
+    }
+    bot.inventory.on('windowUpdate', sendUpdate)
 
     socket.on('disconnect', () => {
-      clearInterval(interval)
+      bot.inventory.removeListener('windowUpdate', sendUpdate)
     })
   })
 
