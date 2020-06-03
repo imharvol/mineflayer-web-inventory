@@ -1,12 +1,17 @@
 # Mineflayer Web Inventory
+A **very** simple web based inventory viewer for [mineflayer](https://github.com/PrismarineJS/mineflayer)
+
+## Install
+`npm install mineflayer-web-inventory`
+
 ## Usage
-- Run `git clone https://github.com/ImHarvol/mineflayer-web-inventory.git` in your bot's folder.
-- Run `npm install` inside ./mineflayer-web-inventory to install dependencies.
-- Import ./mineflayer-web-inventory: `const inventoryViewer = require('./mineflayer-web-inventory')` in your bot's project.
+- Run `npm install mineflayer-web-inventory`.
+- Import mineflayer-web-inventory: `const inventoryViewer = require('./mineflayer-web-inventory')`.
 - Call inventoryViewer with your bot instance: `inventoryViewer(bot)`.
+
 ```js
 const mineflayer = require('mineflayer')
-const inventoryViewer = require('./mineflayer-web-inventory')
+const inventoryViewer = require('mineflayer-web-inventory')
 
 const bot = mineflayer.createBot({
   host: 'localhost',
@@ -16,5 +21,6 @@ const bot = mineflayer.createBot({
 
 inventoryViewer(bot)
 ```
+
 This will start a web server in http://localhost:3000/.
 You can change the port using: `inventoryViewer(bot, PORT)` instead.
