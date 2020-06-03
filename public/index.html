@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title>Mineflayer inventory viewer</title>
+
+  <script src="https://unpkg.com/vue"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="/public/index.css">
+</head>
+
+<body>
+
+  <div id="inventory">
+    <span v-if="Object.keys(inventory).length === 0">No items</span>
+
+    <ul>
+      <li v-for="item in inventory">
+        {{ item.displayName }}: {{ item.count }}
+      </li>
+    </ul>
+
+    <pre>{{ JSON.stringify(inventory, null, 2) }}</pre>
+  </div>
+
+  <script src="/public/index.js"></script>
+
+</body>
+
+</html>
