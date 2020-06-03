@@ -1,0 +1,20 @@
+{
+  "name": "inventory-viewer",
+  "version": "1.0.0",
+  "description": "Web based viewer for your mineflayer bot's inventory",
+  "main": "index.js",
+  "scripts": {
+    "test": "standard",
+    "lint": "standard --fix"
+  },
+  "author": "imharvol <imharvol@gmail.com> (https://imharvol.com/)",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {
+    "standard": "^14.3.4"
+  },
+  "repository": "https://github.com/ImHarvol/inventory-viewer.git"
+}
