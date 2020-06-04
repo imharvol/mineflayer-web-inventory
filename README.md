@@ -1,5 +1,5 @@
 # Mineflayer Web Inventory
-A **very** simple web based inventory viewer for [mineflayer](https://github.com/PrismarineJS/mineflayer)
+A **very** simple web based inventory viewer for [mineflayer](https://github.com/PrismarineJS/mineflayer) updated in real time.
 
 ## Install
 `npm install mineflayer-web-inventory`
@@ -24,3 +24,6 @@ inventoryViewer(bot)
 
 This will start a web server in http://localhost:3000/.
 You can change the port using: `inventoryViewer(bot, PORT)` instead.
+
+## Screenshot
+![Example Screenshot](https://i.imgur.com/iOKN3Y6.png)

@@ -1,6 +1,6 @@
 {
   "name": "mineflayer-web-inventory",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Web based viewer for your mineflayer bot's inventory",
   "main": "index.js",
   "scripts": {
@@ -11,6 +11,7 @@
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "express": "^4.17.1",
+    "minecraft-assets": "^1.2.0",
     "socket.io": "^2.3.0"
   },
   "devDependencies": {
