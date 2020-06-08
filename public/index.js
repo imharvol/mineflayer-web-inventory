@@ -89,18 +89,19 @@ function drawInventory (inventory) {
       itemImage.src = inventory[item].texture
 
       itemImage.onload = function () {
-        // Remove background slot number
-        ctx.fillStyle = '#8C8C8C'
-        ctx.fillRect(inventorySlot[0], inventorySlot[1], 32, 32)
-
         // Draw item image
+        ctx.imageSmoothingEnabled = false
         ctx.drawImage(itemImage, inventorySlot[0], inventorySlot[1], 32, 32)
 
         // Draw item count
-        ctx.font = '20px monospace'
-        ctx.fillStyle = 'white'
-        ctx.textAlign = 'end'
-        ctx.fillText(inventory[item].count, inventorySlot[0] + 32, inventorySlot[1] + 30)
+        if (inventory[item].count > 1) {
+          ctx.font = '20px monospace'
+          ctx.fillStyle = 'black'
+          ctx.textAlign = 'end'
+          ctx.fillText(inventory[item].count, inventorySlot[0] + 33, inventorySlot[1] + 31)
+          ctx.fillStyle = 'white'
+          ctx.fillText(inventory[item].count, inventorySlot[0] + 32, inventorySlot[1] + 30)
+        }
       }
     }
   }
