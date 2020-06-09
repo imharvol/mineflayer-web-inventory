@@ -1,4 +1,4 @@
-/* global io, Vue, Image */
+/* global io, Vue, Image, _ */
 
 var socket = io()
 
@@ -29,8 +29,11 @@ var inventoryComponent = new Vue({
   },
   watch: {
     inventory: function (newInventory) {
-      drawInventory(newInventory)
+      this.throttleDrawInventory(newInventory)
     }
+  },
+  created: function () {
+    this.throttleDrawInventory = _.throttle(drawInventory, 100)
   }
 })
 
