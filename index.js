@@ -2,6 +2,7 @@ const DEFAULT_VERSION = '1.15.2'
 
 module.exports = function (bot, port = 3000) {
   const path = require('path')
+  const _ = require('lodash')
   const express = require('express')
 
   const app = express()
@@ -35,16 +36,25 @@ module.exports = function (bot, port = 3000) {
     }
     socket.emit('inventory', items)
 
-    function sendUpdate (slot, oldItem, newItem) {
+    let updates = {}
+
+    const debounceUpdate = _.debounce(() => {
+      socket.emit('inventoryUpdate', updates)
+      updates = {}
+    }, 100)
+
+    function update (slot, oldItem, newItem) {
       // Add item texture
       if (newItem) newItem.texture = mcAssets.textureContent[newItem.name].texture
 
-      socket.emit('inventoryUpdate', slot, newItem)
+      updates[slot] = newItem
+      debounceUpdate()
     }
-    bot.inventory.on('windowUpdate', sendUpdate)
+    bot.inventory.on('windowUpdate', update)
 
     socket.on('disconnect', () => {
-      bot.inventory.removeListener('windowUpdate', sendUpdate)
+      debounceUpdate.cancel()
+      bot.inventory.removeListener('windowUpdate', update)
     })
   })
 
