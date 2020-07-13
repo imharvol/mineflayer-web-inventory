@@ -2,12 +2,12 @@ const DEFAULT_VERSION = '1.15.2'
 
 module.exports = function (bot, options) {
   options = options || {}
-  let path = options.path || require('path')
-  let express = options.express || require('express')
-  let app = options.app || express()
-  let http = options.http || require('http').createServer(app)
-  let io = options.io || require('socket.io').listen(http)
-  let port = options.port || 3000
+  const path = options.path || require('path')
+  const express = options.express || require('express')
+  const app = options.app || express()
+  const http = options.http || require('http').createServer(app)
+  const io = options.io || require('socket.io').listen(http)
+  const port = options.port || 3000
 
   const _ = require('lodash')
 
