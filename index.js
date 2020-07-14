@@ -1,4 +1,4 @@
-const DEFAULT_VERSION = '1.15.2'
+const DEFAULT_VERSION = '1.16'
 
 module.exports = function (bot, options) {
   options = options || {}
@@ -17,7 +17,7 @@ module.exports = function (bot, options) {
   if (!mcAssets) {
     mcAssets = require('minecraft-assets')(DEFAULT_VERSION)
     if (mcAssets) {
-      console.log(`(web-inventory) WARNING: Please, specify a bot.version. Using ${DEFAULT_VERSION} for minecraft-assets`)
+      console.log(`(web-inventory) WARNING: Please, specify a bot.version or web-inventory may not work properly. Using version ${DEFAULT_VERSION} for minecraft-assets`)
     } else {
       console.log('(web-inventory) ERROR: Couldn\'t load minecraft-assets')
       return
