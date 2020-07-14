@@ -23,7 +23,19 @@ inventoryViewer(bot)
 ```
 
 This will start a web server in http://localhost:3000/.
-You can change the port using: `inventoryViewer(bot, PORT)` instead.
+You can change the options using:
+```js
+  let options = {
+    port: PORT,
+    path: PATH,
+    express: EXPRESS,
+    app: APP,
+    http: HTTP,
+    io: IO
+  }
+
+  inventoryViewer(bot, options)
+```
 
 ## Screenshot
 ![Example Screenshot](https://i.imgur.com/iOKN3Y6.png)
