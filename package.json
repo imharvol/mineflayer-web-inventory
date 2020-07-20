@@ -11,7 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "express": "^4.17.1",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "minecraft-assets": "^1.3.1",
     "socket.io": "^2.3.0"
   },
