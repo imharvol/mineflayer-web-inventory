@@ -63,4 +63,8 @@ module.exports = function (bot, options) {
   http.listen(port, () => {
     console.log(`Inventory web server running on *:${port}`)
   })
+
+  bot.on('end', () => {
+    http.close()
+  })
 }

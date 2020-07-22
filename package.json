@@ -4,8 +4,8 @@
   "description": "Web based viewer for your mineflayer bot's inventory",
   "main": "index.js",
   "scripts": {
-    "test": "standard",
-    "lint": "standard --fix"
+    "test": "npm run lint && mocha",
+    "lint": "standard"
   },
   "author": "imharvol <imharvol@gmail.com> (https://imharvol.com/)",
   "license": "MIT",
@@ -16,6 +16,10 @@
     "socket.io": "^2.3.0"
   },
   "devDependencies": {
+    "minecraft-wrap": "^1.2.3",
+    "mineflayer": "^2.24.0",
+    "mocha": "^8.0.1",
+    "socket.io-client": "^2.3.0",
     "standard": "^14.3.4"
   },
   "repository": "https://github.com/ImHarvol/mineflayer-web-inventory.git",
