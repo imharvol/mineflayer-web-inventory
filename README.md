@@ -4,6 +4,9 @@ A **very** simple web based inventory viewer for [mineflayer](https://github.com
 ## Install
 `npm install mineflayer-web-inventory`
 
+[![npm version](https://badge.fury.io/js/mineflayer-web-inventory.svg)](https://badge.fury.io/js/mineflayer-web-inventory)
+
+
 ## Usage
 - Run `npm install mineflayer-web-inventory`.
 - Import mineflayer-web-inventory: `const inventoryViewer = require('./mineflayer-web-inventory')`.
