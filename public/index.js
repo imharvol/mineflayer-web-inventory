@@ -29,7 +29,8 @@ socket.on('inventoryUpdate', function (inventoryUpdate) {
 var inventoryComponent = new Vue({
   el: '#inventory',
   data: {
-    inventory: []
+    inventory: [],
+    showJSON: false
   },
   watch: {
     inventory: function (newInventory) {

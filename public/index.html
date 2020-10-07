@@ -21,6 +21,9 @@
   </div>
 
   <div id="inventory">
+    <button v-if="showJSON" v-on:click="showJSON = false">Hide JSON</button>
+    <button v-if="!showJSON" v-on:click="showJSON = true">Show JSON</button>
+
     <span v-if="Object.keys(inventory).length === 0">No items</span>
 
     <ul>
@@ -29,7 +32,7 @@
       </li>
     </ul>
 
-    <pre>{{ JSON.stringify(inventory, null, 2) }}</pre>
+    <pre v-if="showJSON">{{ JSON.stringify(inventory, null, 2) }}</pre>
   </div>
 
   <script src="/public/index.js"></script>
