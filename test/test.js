@@ -55,9 +55,9 @@ describe('mineflayer-web-inventory tests', () => {
         // Start the inventory viewer
         inventoryViewer(bot, { port: inventoryViewerPort })
 
-        bot.once('login', () => {
+        bot.once('spawn', () => {
           server.writeServer('op test\n')
-          setTimeout(done, 3 * 1000)
+          setTimeout(done, 5 * 1000)
         })
       })
     })
