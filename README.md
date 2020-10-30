@@ -34,11 +34,19 @@ You can change the options using:
     express: EXPRESS,
     app: APP,
     http: HTTP,
-    io: IO
+    io: IO,
+    startOnLoad: BOOLEAN
   }
 
   inventoryViewer(bot, options)
 ```
+You can access the options in bot.webInventory.options
+
+#### bot.webInventory.start([cb])
+Starts the web server. This function is called when the plugin is first loaded unless `options.startOnLoad` is `false`
+
+#### bot.webInventory.stop([cb])
+Stops the web server. You can check the current status of the web server using `bot.webInventory.isRunning` which returns a boolean
 
 ## Screenshot
 ![Example Screenshot](https://i.imgur.com/iOKN3Y6.png)

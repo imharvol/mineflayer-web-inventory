@@ -12,6 +12,12 @@ module.exports = function (bot, options) {
   const path = require('path')
   const _ = require('lodash')
 
+  bot.webInventory = {
+    options,
+    start,
+    stop
+  }
+
   // Try to load mcAssets
   let mcAssets = require('minecraft-assets')(bot.version)
   if (!mcAssets) {
@@ -60,11 +66,33 @@ module.exports = function (bot, options) {
     })
   })
 
-  http.listen(port, () => {
-    console.log(`Inventory web server running on *:${port}`)
+  bot.on('end', () => {
+    stop()
   })
 
-  bot.on('end', () => {
-    http.close()
-  })
+  if (options.startOnLoad || options.startOnLoad === undefined || options.startOnLoad === null) start() // Start the server by default when the plugin is loaded
+
+  function start (cb) {
+    cb = cb || noop
+    if (bot.webInventory.isRunning) return cb(new Error('mineflayer-web-inventory is already running'))
+
+    http.listen(port, () => {
+      bot.webInventory.isRunning = true
+      console.log(`Inventory web server running on *:${port}`)
+      cb()
+    })
+  }
+
+  function stop (cb) {
+    cb = cb || noop
+    if (!bot.webInventory.isRunning) return cb(new Error('mineflayer-web-inventory is not running'))
+
+    http.close(() => {
+      bot.webInventory.isRunning = false
+      console.log('Inventory web server closed')
+      cb()
+    })
+  }
 }
+
+function noop () {}
