@@ -1,6 +1,6 @@
 /* global io, Vue, Image, _ */
 
-var socket = io()
+const socket = io()
 
 socket.on('inventory', function (inv) {
   inventoryComponent.inventory = inv
@@ -26,7 +26,7 @@ socket.on('inventoryUpdate', function (inventoryUpdate) {
   }
 })
 
-var inventoryComponent = new Vue({
+const inventoryComponent = new Vue({
   el: '#inventory',
   data: {
     inventory: [],
@@ -82,8 +82,8 @@ for (let i = 27 + 1; i <= 35; i++) {
 
 // CANVAS
 function drawInventory (inventory) {
-  var canvas = document.getElementById('inventoryCanvas')
-  var ctx = canvas.getContext('2d')
+  const canvas = document.getElementById('inventoryCanvas')
+  const ctx = canvas.getContext('2d')
 
   // Draw background
   ctx.drawImage(document.getElementById('inventoryImage'), 0, 0)
