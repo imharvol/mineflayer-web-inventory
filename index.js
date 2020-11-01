@@ -38,7 +38,7 @@ module.exports = function (bot, options) {
 
   io.on('connection', (socket) => {
     // Add item textures
-    const items = bot.inventory.items()
+    const items = bot.inventory.itemsRange(0, bot.inventory.inventoryEnd)
     for (const item in items) {
       items[item].texture = mcAssets.textureContent[items[item].name].texture
     }
