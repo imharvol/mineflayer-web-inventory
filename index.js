@@ -51,7 +51,16 @@ module.exports = function (bot, options) {
       updates = {}
     }, 100)
 
-    function update (slot, oldItem, newItem) {
+    function update (slot, oldItem, newItem, window) {
+      if (window) { // This means that the update is not from the inventory window, so we need to set the right slot
+        if (slot >= window.inventoryStart && slot < window.inventoryEnd) {
+          slot -= window.inventoryStart - 9
+          if (newItem) newItem.slot = slot
+        } else { // If the update is outside the inventory part we should just ignore it
+          return
+        }
+      }
+
       // Add item texture
       if (newItem) newItem.texture = mcAssets.textureContent[newItem.name].texture
 
@@ -59,6 +68,12 @@ module.exports = function (bot, options) {
       debounceUpdate()
     }
     bot.inventory.on('windowUpdate', update)
+
+    bot.on('windowOpen', (window) => {
+      window.on('windowUpdate', (slot, oldItem, newItem) => {
+        update(slot, oldItem, newItem, window)
+      })
+    })
 
     socket.on('disconnect', () => {
       debounceUpdate.cancel()

@@ -85,7 +85,6 @@ describe('mineflayer-web-inventory tests', () => {
     this.timeout(10 * 1000)
 
     socket.once('inventoryUpdate', (updates) => {
-      console.log(updates)
       assert(updates[38])
       assert.strictEqual(updates[38].name, 'dirt')
       assert.strictEqual(updates[38].count, 16)
