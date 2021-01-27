@@ -19,16 +19,15 @@ const serverProperties = {
 
 const minecraftVersion = '1.16'
 
-describe('mineflayer-web-inventory tests', () => {
+describe('mineflayer-web-inventory tests', function () {
   let bot, socket
+  this.timeout(10 * 60 * 1000)
+
   const serverPort = Math.round(30000 + Math.random() * 20000)
   serverProperties['server-port'] = serverPort
   const inventoryViewerPort = serverPort + 1
   const jarFile = path.join(__dirname, 'server.jar')
   const serverDir = path.join(__dirname, 'server')
-
-  console.log('TEST:', `Starting Minecraft server on localhost:${serverPort}`)
-  console.log('TEST:', `Starting Inventory Viewer on http://localhost:${inventoryViewerPort}`)
 
   const server = new wrap.WrapServer(jarFile, serverDir)
   server.on('line', function (line) {
@@ -39,6 +38,7 @@ describe('mineflayer-web-inventory tests', () => {
     this.timeout(2 * 60 * 1000)
 
     // Download and start the server
+    console.log('TEST:', `Starting Minecraft server on localhost:${serverPort}`)
     wrap.download(minecraftVersion, jarFile, (err) => {
       if (err) throw err
       server.startServer(serverProperties, (err) => {
@@ -53,6 +53,7 @@ describe('mineflayer-web-inventory tests', () => {
         })
 
         // Start the inventory viewer
+        console.log('TEST:', `Starting Inventory Viewer on http://localhost:${inventoryViewerPort}`)
         inventoryViewer(bot, { port: inventoryViewerPort })
 
         bot.once('spawn', () => {
