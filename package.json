@@ -1,6 +1,6 @@
 {
   "name": "mineflayer-web-inventory",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Web based viewer for your mineflayer bot's inventory",
   "main": "index.js",
   "scripts": {
