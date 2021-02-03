@@ -64,7 +64,12 @@ describe('mineflayer-web-inventory tests', function () {
     })
   })
 
-  it('\'inventory\' event', function (done) {
+  beforeEach('Reset State', function (done) {
+    bot.chat('/clear\n')
+    setTimeout(done, 500)
+  })
+
+  it('\'inventory\' Event', function (done) {
     this.timeout(10 * 1000)
 
     bot.chat('/give test pumpkin 32\n')
@@ -79,19 +84,58 @@ describe('mineflayer-web-inventory tests', function () {
         assert.strictEqual(inventory[1].count, 16)
         done()
       })
-    }, 250)
+    }, 500)
   })
 
-  it('\'inventoryUpdate\' event', function (done) {
+  it('\'inventoryUpdate\' Event', function (done) {
     this.timeout(10 * 1000)
 
+    bot.chat('/give test dirt 16\n')
+
     socket.once('inventoryUpdate', (updates) => {
-      assert(updates[38])
-      assert.strictEqual(updates[38].name, 'dirt')
-      assert.strictEqual(updates[38].count, 16)
+      assert(updates[36])
+      assert.strictEqual(updates[36].name, 'dirt')
+      assert.strictEqual(updates[36].count, 16)
       done()
     })
+  })
+
+  // Check that the inventory is updated even when a chest is open (even though it should work with other windows)
+  it('Chest Updates', function (done) {
+    this.timeout(30 * 1000)
+
+    const chestPos = bot.entity.position.floored().offset(0, 0, 1)
     bot.chat('/give test dirt 16\n')
+    bot.chat(`/setblock ${chestPos.toArray().join(' ')} minecraft:chest\n`)
+
+    bot.once(`blockUpdate:${chestPos.toString()}`, (oldBlock, newBlock) => {
+      const chest = bot.openChest(bot.blockAt(chestPos))
+      chest.once('open', () => {
+        setTimeout(() => { // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is openned that and that we don't want
+          bot.moveSlotItem(54, 0, noop)
+          socket.once('inventoryUpdate', (updates) => {
+            assert.strictEqual(updates[36], null)
+
+            bot.moveSlotItem(0, 56, noop)
+            socket.once('inventoryUpdate', (updates) => {
+              assert(updates[38]) // It may look as if this should be 56, but note that the socket receives the position in the inventory, not in the inventory + chest
+              assert.strictEqual(updates[38].name, 'dirt')
+              assert.strictEqual(updates[38].count, 16)
+
+              bot.chat('/give test pumpkin 32\n')
+              socket.once('inventoryUpdate', (updates) => {
+                assert(updates[36])
+                assert.strictEqual(updates[36].name, 'pumpkin')
+                assert.strictEqual(updates[36].count, 32)
+
+                chest.close()
+                done()
+              })
+            })
+          })
+        }, 500)
+      })
+    })
   })
 
   after('Test Server Termination', function (done) {
@@ -116,3 +160,5 @@ describe('mineflayer-web-inventory tests', function () {
     })
   })
 })
+
+function noop () {}
