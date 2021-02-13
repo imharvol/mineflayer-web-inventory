@@ -67,23 +67,23 @@ module.exports = function (bot, options) {
       updates[slot] = newItem
       debounceUpdate()
     }
-    bot.inventory.on('windowUpdate', update)
+    bot.inventory.on('updateSlot', update)
 
     const windowOpenHandler = (window) => {
       const windowUpdateHandler = (slot, oldItem, newItem) => {
         update(slot, oldItem, newItem, window)
       }
-      window.on('windowUpdate', windowUpdateHandler)
+      window.on('updateSlot', windowUpdateHandler)
 
       window.once('close', () => {
-        window.removeListener('windowUpdate', windowUpdateHandler)
+        window.removeListener('updateSlot', windowUpdateHandler)
       })
     }
     bot.on('windowOpen', windowOpenHandler)
 
     socket.once('disconnect', () => {
       debounceUpdate.cancel()
-      bot.inventory.removeListener('windowUpdate', update)
+      bot.inventory.removeListener('updateSlot', update)
       bot.removeListener('windowOpen', windowOpenHandler)
     })
   })

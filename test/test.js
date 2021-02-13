@@ -108,32 +108,31 @@ describe('mineflayer-web-inventory tests', function () {
     bot.chat('/give test dirt 16\n')
     bot.chat(`/setblock ${chestPos.toArray().join(' ')} minecraft:chest\n`)
 
-    bot.once(`blockUpdate:${chestPos.toString()}`, (oldBlock, newBlock) => {
-      const chest = bot.openChest(bot.blockAt(chestPos))
-      chest.once('open', () => {
-        setTimeout(() => { // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is openned that and that we don't want
-          bot.moveSlotItem(54, 0, noop)
+    bot.once(`blockUpdate:${chestPos.toString()}`, async (oldBlock, newBlock) => {
+      const chest = await bot.openContainer(bot.blockAt(chestPos))
+
+      await sleep(500) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is openned that and that we don't want
+
+      bot.moveSlotItem(54, 0, noop)
+      socket.once('inventoryUpdate', (updates) => {
+        assert.strictEqual(updates[36], null)
+
+        bot.moveSlotItem(0, 56, noop)
+        socket.once('inventoryUpdate', (updates) => {
+          assert(updates[38]) // It may look as if this should be 56, but note that the socket receives the position in the inventory, not in the inventory + chest
+          assert.strictEqual(updates[38].name, 'dirt')
+          assert.strictEqual(updates[38].count, 16)
+
+          bot.chat('/give test pumpkin 32\n')
           socket.once('inventoryUpdate', (updates) => {
-            assert.strictEqual(updates[36], null)
+            assert(updates[36])
+            assert.strictEqual(updates[36].name, 'pumpkin')
+            assert.strictEqual(updates[36].count, 32)
 
-            bot.moveSlotItem(0, 56, noop)
-            socket.once('inventoryUpdate', (updates) => {
-              assert(updates[38]) // It may look as if this should be 56, but note that the socket receives the position in the inventory, not in the inventory + chest
-              assert.strictEqual(updates[38].name, 'dirt')
-              assert.strictEqual(updates[38].count, 16)
-
-              bot.chat('/give test pumpkin 32\n')
-              socket.once('inventoryUpdate', (updates) => {
-                assert(updates[36])
-                assert.strictEqual(updates[36].name, 'pumpkin')
-                assert.strictEqual(updates[36].count, 32)
-
-                chest.close()
-                done()
-              })
-            })
+            chest.close()
+            done()
           })
-        }, 500)
+        })
       })
     })
   })
@@ -162,3 +161,9 @@ describe('mineflayer-web-inventory tests', function () {
 })
 
 function noop () {}
+
+function sleep (ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
