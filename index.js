@@ -6,7 +6,7 @@ module.exports = function (bot, options) {
   const express = options.express || require('express')
   const app = options.app || express()
   const http = options.http || require('http').createServer(app)
-  const io = options.io || require('socket.io').listen(http)
+  const io = options.io || require('socket.io')(http)
   const port = options.port || 3000
 
   const path = require('path')

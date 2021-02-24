@@ -10,6 +10,7 @@
 
 const mineflayer = require('mineflayer')
 const inventoryViewer = require('mineflayer-web-inventory')
+// const inventoryViewer = require('./index')
 
 if (process.argv.length > 6) {
   console.log('Usage : node example.js [<host>] [<port>] [<name>] [<password>]')
