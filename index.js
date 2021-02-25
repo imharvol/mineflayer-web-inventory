@@ -6,7 +6,7 @@ module.exports = function (bot, options) {
   const express = options.express || require('express')
   const app = options.app || express()
   const http = options.http || require('http').createServer(app)
-  const io = options.io || require('socket.io')(http)
+  const io = options.io || require('socket.io').listen(http)
   const port = options.port || 3000
 
   const path = require('path')
@@ -36,9 +36,29 @@ module.exports = function (bot, options) {
     res.sendFile(path.join(__dirname, 'public', 'index.html'))
   })
 
+  function getName (item) {
+    let message = item.displayName
+    if (item.nbt == null) return message
+  
+    const nbt = require('prismarine-nbt')
+    const ChatMessage = require('prismarine-chat')('1.12.2')
+  
+    const data = nbt.simplify(item.nbt)
+    const display = data.display
+    if (display == null) return message
+  
+    const name = display.Name
+    if (name == null) return message
+    message = new ChatMessage(JSON.parse(name)).toString()
+    return message
+  }
+
   io.on('connection', (socket) => {
     // Add item textures
     const items = bot.inventory.itemsRange(0, bot.inventory.inventoryEnd)
+    for (const item in items) {
+      items[item].displayName = getName(items[item])
+    }
     for (const item in items) {
       items[item].texture = mcAssets.textureContent[items[item].name].texture
     }
