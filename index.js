@@ -79,7 +79,8 @@ module.exports = function (bot, options) {
         window.removeListener('updateSlot', windowUpdateHandler)
       })
     }
-    bot.on('windowOpen', windowOpenHandler)
+
+    // bot.on('windowOpen', windowOpenHandler)
 
     socket.once('disconnect', () => {
       debounceUpdate.cancel()
