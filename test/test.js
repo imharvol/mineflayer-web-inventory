@@ -6,6 +6,7 @@ const wrap = require('minecraft-wrap')
 const mineflayer = require('mineflayer')
 const socketioClient = require('socket.io-client')
 const inventoryViewer = require('../')
+const vec3 = require('vec3')
 
 const serverProperties = {
   'level-type': 'FLAT',
@@ -23,11 +24,15 @@ describe('mineflayer-web-inventory tests', function () {
   let bot, socket
   this.timeout(10 * 60 * 1000)
 
+  const botPos = vec3(50.5, 4, 50.5)
+  const chest1Pos = botPos.floored().offset(0, 0, 1)
+
   const serverPort = Math.round(30000 + Math.random() * 20000)
   serverProperties['server-port'] = serverPort
   const inventoryViewerPort = serverPort + 1
   const jarFile = path.join(__dirname, 'server.jar')
   const serverDir = path.join(__dirname, 'server')
+  const mcData = require('minecraft-data')(minecraftVersion)
 
   const server = new wrap.WrapServer(jarFile, serverDir)
   server.on('line', function (line) {
@@ -58,15 +63,26 @@ describe('mineflayer-web-inventory tests', function () {
 
         bot.once('spawn', () => {
           server.writeServer('op test\n')
-          setTimeout(done, 5 * 1000)
+
+          setTimeout(done, 10 * 1000)
         })
       })
     })
   })
 
   beforeEach('Reset State', function (done) {
+    this.timeout(15 * 1000)
+
+    bot.chat(`/setblock ${chest1Pos.toArray().join(' ')} minecraft:air\n`)
+    bot.chat('/kill @e[type=item]\n')
     bot.chat('/clear\n')
-    setTimeout(done, 500)
+    bot.chat(`/tp ${botPos.toArray().join(' ')}\n`)
+
+    // Connect to the socket
+    socket = socketioClient(`http://localhost:${inventoryViewerPort}/`).connect()
+    socket.on('connect', () => {
+      setTimeout(done, 5000)
+    })
   })
 
   it('\'inventory\' Event', function (done) {
@@ -76,12 +92,15 @@ describe('mineflayer-web-inventory tests', function () {
     bot.chat('/give test melon 16\n')
 
     setTimeout(() => {
-      socket = socketioClient(`http://localhost:${inventoryViewerPort}/`).connect()
-      socket.once('inventory', (inventory) => {
+      const tmpSocket = socketioClient(`http://localhost:${inventoryViewerPort}/`).connect()
+      tmpSocket.once('inventory', (inventory) => {
         assert.strictEqual(inventory[0].name, 'pumpkin')
         assert.strictEqual(inventory[0].count, 32)
         assert.strictEqual(inventory[1].name, 'melon')
         assert.strictEqual(inventory[1].count, 16)
+
+        tmpSocket.disconnect()
+
         done()
       })
     }, 500)
@@ -101,17 +120,16 @@ describe('mineflayer-web-inventory tests', function () {
   })
 
   // Check that the inventory is updated even when a chest is open (even though it should work with other windows)
-  it('Chest Updates', function (done) {
+  it('Chest Updates Using moveSlotItem', function (done) {
     this.timeout(30 * 1000)
 
-    const chestPos = bot.entity.position.floored().offset(0, 0, 1)
     bot.chat('/give test dirt 16\n')
-    bot.chat(`/setblock ${chestPos.toArray().join(' ')} minecraft:chest\n`)
+    bot.chat(`/setblock ${chest1Pos.toArray().join(' ')} minecraft:chest\n`)
 
-    bot.once(`blockUpdate:${chestPos.toString()}`, async (oldBlock, newBlock) => {
-      const chest = await bot.openContainer(bot.blockAt(chestPos))
+    setTimeout(async () => {
+      const chest = await bot.openContainer(bot.blockAt(chest1Pos))
 
-      await sleep(500) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is openned that and that we don't want
+      await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is openned that and that we don't want
 
       bot.moveSlotItem(54, 0, noop)
       socket.once('inventoryUpdate', (updates) => {
@@ -134,7 +152,38 @@ describe('mineflayer-web-inventory tests', function () {
           })
         })
       })
-    })
+    }, 2500)
+  })
+
+  // TODO: Do the same with withdraw
+  it('Chest Updates Using deposit', function (done) {
+    this.timeout(30 * 1000)
+
+    bot.chat('/give test dirt 16\n')
+    bot.chat(`/setblock ${chest1Pos.toArray().join(' ')} minecraft:chest\n`)
+
+    setTimeout(async () => {
+      const chest = await bot.openContainer(bot.blockAt(chest1Pos))
+
+      await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is openned that and that we don't want
+
+      socket.once('inventoryUpdate', (updates) => {
+        assert.strictEqual(updates[36], null)
+        done()
+      })
+      chest.deposit(mcData.itemsByName.dirt.id, null, 16, noop)
+    }, 2500)
+  })
+
+  afterEach('Reset State', function (done) {
+    this.timeout(15 * 1000)
+
+    if (socket && socket.connected) {
+      socket.on('disconnect', () => done())
+      socket.disconnect()
+    } else {
+      done()
+    }
   })
 
   after('Test Server Termination', function (done) {

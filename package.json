@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "npm run lint && mocha",
-    "lint": "standard"
+    "lint": "standard",
+    "clean": "rm -rf test/server/ test/server.jar versions/"
   },
   "author": "imharvol <imharvol@gmail.com> (https://imharvol.com/)",
   "license": "MIT",
@@ -13,7 +14,9 @@
     "express": "^4.17.1",
     "lodash": "^4.17.21",
     "minecraft-assets": "^1.6.0",
-    "socket.io": "^3.1.1"
+    "minecraft-data": "^2.88.0",
+    "socket.io": "^3.1.1",
+    "vec3": "^0.1.7"
   },
   "devDependencies": {
     "minecraft-wrap": "^1.3.0",

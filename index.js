@@ -8,6 +8,7 @@ module.exports = function (bot, options) {
   const http = options.http || require('http').createServer(app)
   const io = options.io || require('socket.io')(http)
   const port = options.port || 3000
+  const debounceTime = options.debounceTime || 100
 
   const path = require('path')
   const _ = require('lodash')
@@ -30,6 +31,7 @@ module.exports = function (bot, options) {
     }
   }
 
+  // TODO: This should be path.join(webPath, 'public')
   app.use('/public', express.static(path.join(__dirname, 'public')))
 
   app.get(webPath, (req, res) => {
@@ -37,7 +39,7 @@ module.exports = function (bot, options) {
   })
 
   io.on('connection', (socket) => {
-    // Add item textures
+    // On connection sends the initial state of the inventory. Also has to add each item's texture
     const items = bot.inventory.itemsRange(0, bot.inventory.inventoryEnd)
     for (const item in items) {
       items[item].texture = mcAssets.textureContent[items[item].name].texture
@@ -49,10 +51,13 @@ module.exports = function (bot, options) {
     const debounceUpdate = _.debounce(() => {
       socket.emit('inventoryUpdate', updates)
       updates = {}
-    }, 100)
+    }, debounceTime)
 
     function update (slot, oldItem, newItem, window) {
-      if (window) { // This means that the update is not from the inventory window, so we need to set the right slot
+      if (oldItem) oldItem = Object.assign({}, oldItem)
+      if (newItem) newItem = Object.assign({}, newItem)
+
+      if (window.id !== bot.inventory.id) { // If the update is not from the inventory window, we need to set the right slot number
         if (slot >= window.inventoryStart && slot < window.inventoryEnd) {
           slot -= window.inventoryStart - 9
           if (newItem) newItem.slot = slot
@@ -67,9 +72,11 @@ module.exports = function (bot, options) {
       updates[slot] = newItem
       debounceUpdate()
     }
-    bot.inventory.on('updateSlot', update)
+    bot.inventory.on('updateSlot', (slot, oldItem, newItem) => update(slot, oldItem, newItem, bot.inventory))
 
     const windowOpenHandler = (window) => {
+      if (window.id === bot.inventory.id) return // We don't want to emit updates from the inventory twice
+
       const windowUpdateHandler = (slot, oldItem, newItem) => {
         update(slot, oldItem, newItem, window)
       }
@@ -96,22 +103,22 @@ module.exports = function (bot, options) {
 
   function start (cb) {
     cb = cb || noop
-    if (bot.webInventory.isRunning) return cb(new Error('mineflayer-web-inventory is already running'))
+    if (bot.webInventory.isRunning) return cb(new Error('(web-inventory) INFO: web-inventory is already running'))
 
     http.listen(port, () => {
       bot.webInventory.isRunning = true
-      console.log(`Inventory web server running on *:${port}`)
+      console.log(`(web-inventory) INFO: Inventory web server running on *:${port}`)
       cb()
     })
   }
 
   function stop (cb) {
     cb = cb || noop
-    if (!bot.webInventory.isRunning) return cb(new Error('mineflayer-web-inventory is not running'))
+    if (!bot.webInventory.isRunning) return cb(new Error('(web-inventory) INFO: web-inventory is not running'))
 
     http.close(() => {
       bot.webInventory.isRunning = false
-      console.log('Inventory web server closed')
+      console.log('(web-inventory) INFO: Inventory web server closed')
       cb()
     })
   }
