@@ -25,7 +25,8 @@ describe('mineflayer-web-inventory tests', function () {
   this.timeout(10 * 60 * 1000)
 
   const botPos = vec3(50.5, 4, 50.5)
-  const chest1Pos = botPos.floored().offset(0, 0, 1)
+  const container1Pos = botPos.floored().offset(0, 0, 1)
+  const container2Pos = botPos.floored().offset(0, 0, 2)
 
   const serverPort = Math.round(30000 + Math.random() * 20000)
   serverProperties['server-port'] = serverPort
@@ -73,7 +74,8 @@ describe('mineflayer-web-inventory tests', function () {
   beforeEach('Reset State', function (done) {
     this.timeout(15 * 1000)
 
-    bot.chat(`/setblock ${chest1Pos.toArray().join(' ')} minecraft:air\n`)
+    bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:air\n`)
+    bot.chat(`/setblock ${container2Pos.toArray().join(' ')} minecraft:air\n`)
     bot.chat('/kill @e[type=item]\n')
     bot.chat('/clear\n')
     bot.chat(`/tp ${botPos.toArray().join(' ')}\n`)
@@ -124,10 +126,13 @@ describe('mineflayer-web-inventory tests', function () {
     this.timeout(30 * 1000)
 
     bot.chat('/give test dirt 16\n')
-    bot.chat(`/setblock ${chest1Pos.toArray().join(' ')} minecraft:chest\n`)
+    bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest\n`)
 
     setTimeout(async () => {
-      const chest = await bot.openContainer(bot.blockAt(chest1Pos))
+      assert.strictEqual(bot.inventory.slots[36].name, 'dirt')
+      assert.strictEqual(bot.inventory.slots[36].count, 16)
+
+      const chest = await bot.openContainer(bot.blockAt(container1Pos))
 
       await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is openned that and that we don't want
 
@@ -155,23 +160,126 @@ describe('mineflayer-web-inventory tests', function () {
     }, 2500)
   })
 
-  // TODO: Do the same with withdraw
-  it('Chest Updates Using deposit', function (done) {
+  it('Chest Updates Using deposit and withdraw', function (done) {
     this.timeout(30 * 1000)
 
     bot.chat('/give test dirt 16\n')
-    bot.chat(`/setblock ${chest1Pos.toArray().join(' ')} minecraft:chest\n`)
+    bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest\n`)
 
     setTimeout(async () => {
-      const chest = await bot.openContainer(bot.blockAt(chest1Pos))
+      assert.strictEqual(bot.inventory.slots[36].name, 'dirt')
+      assert.strictEqual(bot.inventory.slots[36].count, 16)
+
+      const chest = await bot.openContainer(bot.blockAt(container1Pos))
 
       await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is openned that and that we don't want
 
       socket.once('inventoryUpdate', (updates) => {
         assert.strictEqual(updates[36], null)
-        done()
+
+        socket.once('inventoryUpdate', (updates) => {
+          assert(updates[9])
+          assert.strictEqual(updates[9].name, 'dirt')
+          assert.strictEqual(updates[9].count, 16)
+
+          done()
+        })
+        chest.withdraw(mcData.itemsByName.dirt.id, null, 16, noop)
       })
       chest.deposit(mcData.itemsByName.dirt.id, null, 16, noop)
+    }, 2500)
+  })
+
+  it('Double Chest Updates Using deposit and withdraw', function (done) {
+    this.timeout(30 * 1000)
+
+    bot.chat('/give test dirt 16\n')
+    bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest\n`)
+    bot.chat(`/setblock ${container2Pos.toArray().join(' ')} minecraft:chest\n`)
+
+    setTimeout(async () => {
+      assert.strictEqual(bot.inventory.slots[36].name, 'dirt')
+      assert.strictEqual(bot.inventory.slots[36].count, 16)
+
+      const chest = await bot.openContainer(bot.blockAt(container1Pos))
+
+      await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is openned that and that we don't want
+
+      socket.once('inventoryUpdate', (updates) => {
+        assert.strictEqual(updates[36], null)
+
+        socket.once('inventoryUpdate', (updates) => {
+          assert(updates[9])
+          assert.strictEqual(updates[9].name, 'dirt')
+          assert.strictEqual(updates[9].count, 16)
+
+          done()
+        })
+        chest.withdraw(mcData.itemsByName.dirt.id, null, 16, noop)
+      })
+      chest.deposit(mcData.itemsByName.dirt.id, null, 16, noop)
+    }, 2500)
+  })
+
+  /**
+   * - Gives 16xcoal to the bot
+   * - Gives 1xraw beef to the bot
+   * - Places the furnace
+   * - Opens the furnace
+   * - Puts the coal in the furnace
+   * - Puts the beef in the furnace and waits for it to be cooked
+   * - Takes the output (1xcooked beef)
+   * - Takes the fuel (15xcoal)
+   *
+   * All of this while verifiying that it's being updated correctly on the socket
+   */
+  it('Furnace Updates Using Furnace\'s functions', function (done) {
+    this.timeout(30 * 1000)
+
+    bot.chat('/give test coal 16\n')
+    bot.chat('/give test beef 1\n')
+    bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:furnace\n`)
+
+    setTimeout(async () => {
+      assert.strictEqual(bot.inventory.slots[36].name, 'coal')
+      assert.strictEqual(bot.inventory.slots[36].count, 16)
+      assert.strictEqual(bot.inventory.slots[37].name, 'beef')
+      assert.strictEqual(bot.inventory.slots[37].count, 1)
+
+      const furnace = await bot.openFurnace(bot.blockAt(container1Pos))
+
+      await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is openned that and that we don't want
+
+      socket.once('inventoryUpdate', (updates) => {
+        assert.strictEqual(updates[36], null)
+
+        socket.once('inventoryUpdate', (updates) => {
+          assert.strictEqual(updates[37], null)
+
+          function furnaceUpdateHandler () {
+            if (furnace.outputItem()) {
+              furnace.removeListener('update', furnaceUpdateHandler)
+
+              socket.once('inventoryUpdate', (updates) => {
+                assert.strictEqual(updates[9].name, 'cooked_beef')
+                assert.strictEqual(updates[9].count, 1)
+
+                socket.once('inventoryUpdate', (updates) => {
+                  assert.strictEqual(updates[10].name, 'coal')
+                  assert.strictEqual(updates[10].count, 15)
+
+                  done()
+                })
+                furnace.takeFuel(noop)
+              })
+              furnace.takeOutput(noop)
+            }
+          }
+          furnace.on('update', furnaceUpdateHandler)
+        })
+        furnace.putInput(mcData.itemsByName.beef.id, null, 1, noop)
+      })
+      furnace.putFuel(mcData.itemsByName.coal.id, null, 16, noop)
     }, 2500)
   })
 
