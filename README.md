@@ -11,7 +11,7 @@ If you still wish to use mineflayer-web-inventory with mineflayer 2.X.X you can 
 
 ## Usage
 - Run `npm install mineflayer-web-inventory`.
-- Import mineflayer-web-inventory: `const inventoryViewer = require('./mineflayer-web-inventory')`.
+- Import mineflayer-web-inventory: `const inventoryViewer = require('mineflayer-web-inventory')`.
 - Call inventoryViewer with your bot instance: `inventoryViewer(bot)`.
 
 ```js
@@ -37,7 +37,8 @@ You can change the options using:
     app: APP,
     http: HTTP,
     io: IO,
-    startOnLoad: BOOLEAN
+    startOnLoad: BOOLEAN,
+    debounceTime: BOOLEAN
   }
 
   inventoryViewer(bot, options)
