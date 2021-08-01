@@ -39,44 +39,45 @@ module.exports = function (bot, options) {
   })
 
   io.on('connection', (socket) => {
-    // On connection sends the initial state of the inventory. Also has to add each item's texture
-    const items = bot.inventory.itemsRange(0, bot.inventory.inventoryEnd)
-    for (const item in items) {
-      items[item].texture = mcAssets.textureContent[items[item].name].texture
+    // On connection sends the initial state of the current window ?? inventory. Also adds each item's texture
+    const initialSlots = {}
+    const initialWindow = bot.currentWindow ?? bot.inventory
+    const initialItems = bot.currentWindow?.items() ?? bot.inventory.itemsRange(0, bot.inventory.inventoryEnd)
+    for (const item in initialItems) { // TODO: Try to simplify this
+      initialItems[item].texture = mcAssets.textureContent[initialItems[item].name].texture
+      initialSlots[initialItems[item].slot] = initialItems[item]
     }
-    socket.emit('inventory', items)
+    socket.emit('window', { id: initialWindow.id, type: initialWindow.type, slots: initialSlots })
 
-    let updates = {}
+    let updateObject = { id: null, type: null, slots: {} }
 
     const debounceUpdate = _.debounce(() => {
-      socket.emit('inventoryUpdate', updates)
-      updates = {}
+      socket.emit('windowUpdate', updateObject)
+      updateObject = { id: null, type: null, slots: {} }
     }, debounceTime)
 
     function update (slot, oldItem, newItem, window) {
+      if (bot.currentWindow && window.id !== bot.currentWindow.id) return
+
+      // Use copies of oldItem and newItem to avoid modifying the internal state of mineflayerº
       if (oldItem) oldItem = Object.assign({}, oldItem)
       if (newItem) newItem = Object.assign({}, newItem)
-
-      if (window.id !== bot.inventory.id) { // If the update is not from the inventory window, we need to set the right slot number
-        if (slot >= window.inventoryStart && slot < window.inventoryEnd) {
-          slot -= window.inventoryStart - 9
-          if (newItem) newItem.slot = slot
-        } else { // If the update is outside the inventory part we should just ignore it
-          return
-        }
-      }
 
       // Add item texture
       if (newItem) newItem.texture = mcAssets.textureContent[newItem.name].texture
 
-      updates[slot] = newItem
+      if (updateObject.id == null && updateObject.type == null) {
+        updateObject.id = window.id
+        updateObject.type = window.type
+      } else if (updateObject.id !== window.id || updateObject.type !== window.type) return
+
+      updateObject.slots[slot] = newItem
+
       debounceUpdate()
     }
     bot.inventory.on('updateSlot', (slot, oldItem, newItem) => update(slot, oldItem, newItem, bot.inventory))
 
     const windowOpenHandler = (window) => {
-      if (window.id === bot.inventory.id) return // We don't want to emit updates from the inventory twice
-
       const windowUpdateHandler = (slot, oldItem, newItem) => {
         update(slot, oldItem, newItem, window)
       }
