@@ -233,42 +233,48 @@ describe('mineflayer-web-inventory tests', function () {
     }, 2500)
   })
 
-  /* TODO: Fix. Right now it passes despite using the same slots that the normal chest uses. This is because when you use /setblock to place 2 chests, these don't combine into a double chest.
   it('Double Chest Updates Using deposit and withdraw', function (done) {
     this.timeout(30 * 1000)
 
     bot.chat('/give test dirt 16\n')
-    bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest\n`)
-    bot.chat(`/setblock ${container2Pos.toArray().join(' ')} minecraft:chest\n`)
+    bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest[facing=west,type=right]\n`)
+    bot.chat(`/setblock ${container2Pos.toArray().join(' ')} minecraft:chest[facing=west,type=left]\n`)
 
     setTimeout(async () => {
-      assert.strictEqual(bot.inventory.slots[36].name, 'dirt')
-      assert.strictEqual(bot.inventory.slots[36].count, 16)
+      assert.strictEqual(bot.inventory.slots[36]?.name, 'dirt')
+      assert.strictEqual(bot.inventory.slots[36]?.count, 16)
 
       const chest = await bot.openContainer(bot.blockAt(container1Pos))
 
       await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is openned that and that we don't want
 
       socket.once('windowUpdate', (windowUpdate) => {
+        assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
+        assert.strictEqual(windowUpdate.type, 'large-chest')
+
         assert.strictEqual(windowUpdate.slots[0]?.name, 'dirt')
         assert.strictEqual(windowUpdate.slots[0]?.count, 16)
         assert(windowUpdate.slots[0]?.texture)
-        assert.strictEqual(windowUpdate.slots[54], null)
+        assert.strictEqual(windowUpdate.slots[81], null)
 
         socket.once('windowUpdate', (windowUpdate) => {
+          assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
+          assert.strictEqual(windowUpdate.type, 'large-chest')
+
           assert.strictEqual(windowUpdate.slots[0], null)
-          assert.strictEqual(windowUpdate.slots[27]?.name, 'dirt')
-          assert.strictEqual(windowUpdate.slots[27]?.count, 16)
-          assert(windowUpdate.slots[27]?.texture)
+          assert.strictEqual(windowUpdate.slots[54]?.name, 'dirt')
+          assert.strictEqual(windowUpdate.slots[54]?.count, 16)
+          assert(windowUpdate.slots[54]?.texture)
+
+          chest.close()
 
           done()
         })
-        chest.withdraw(mcData.itemsByName.dirt.id, null, 16, noop) // Moves from slot 0 to slot 27
+        chest.withdraw(mcData.itemsByName.dirt.id, null, 16, noop) // Moves from slot 0 to slot 54
       })
-      chest.deposit(mcData.itemsByName.dirt.id, null, 16, noop) // Moves from slot 54 to slot 0
+      chest.deposit(mcData.itemsByName.dirt.id, null, 16, noop) // Moves from slot 81 to slot 0
     }, 2500)
   })
-  */
 
   /**
    * - Gives 16xcoal to the bot
@@ -349,6 +355,7 @@ describe('mineflayer-web-inventory tests', function () {
   })
 
   // TODO: Add tests for armor slots
+  // TODO: Add tests that check that a 'window' event is emitted when a window (that is not the inventory) is opened/closed
 
   afterEach('Reset State', function (done) {
     this.timeout(15 * 1000)
