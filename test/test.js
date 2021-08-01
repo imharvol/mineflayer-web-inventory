@@ -100,7 +100,7 @@ describe('mineflayer-web-inventory tests', function () {
           const tmpSocket = socketioClient(`http://localhost:${inventoryViewerPort}/`).connect()
           tmpSocket.once('window', (window) => {
             assert.strictEqual(window.id, 0)
-            assert.strictEqual(window.type, 'minecraft:inventory')
+            assert.strictEqual(window.type, 'inventory')
 
             assert.strictEqual(window.slots[5]?.name, 'iron_helmet')
             assert.strictEqual(window.slots[5]?.count, 1)
@@ -128,7 +128,7 @@ describe('mineflayer-web-inventory tests', function () {
 
     socket.once('windowUpdate', (windowUpdate) => {
       assert.strictEqual(windowUpdate.id, 0)
-      assert.strictEqual(windowUpdate.type, 'minecraft:inventory')
+      assert.strictEqual(windowUpdate.type, 'inventory')
 
       assert.strictEqual(windowUpdate.slots[36]?.name, 'dirt')
       assert.strictEqual(windowUpdate.slots[36]?.count, 16)
@@ -155,7 +155,7 @@ describe('mineflayer-web-inventory tests', function () {
 
       socket.once('windowUpdate', (windowUpdate) => {
         assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-        assert.strictEqual(windowUpdate.type, bot.currentWindow?.type)
+        assert.strictEqual(windowUpdate.type, 'chest')
 
         assert.strictEqual(windowUpdate.slots[0]?.name, 'dirt')
         assert.strictEqual(windowUpdate.slots[0]?.count, 16)
@@ -164,7 +164,7 @@ describe('mineflayer-web-inventory tests', function () {
 
         socket.once('windowUpdate', (windowUpdate) => {
           assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-          assert.strictEqual(windowUpdate.type, bot.currentWindow?.type)
+          assert.strictEqual(windowUpdate.type, 'chest')
 
           assert.strictEqual(windowUpdate.slots[56]?.name, 'dirt')
           assert.strictEqual(windowUpdate.slots[56]?.count, 16)
@@ -173,7 +173,7 @@ describe('mineflayer-web-inventory tests', function () {
 
           socket.once('windowUpdate', (windowUpdate) => {
             assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-            assert.strictEqual(windowUpdate.type, bot.currentWindow?.type)
+            assert.strictEqual(windowUpdate.type, 'chest')
 
             assert.strictEqual(windowUpdate.slots[54]?.name, 'pumpkin')
             assert.strictEqual(windowUpdate.slots[54]?.count, 32)
@@ -207,7 +207,7 @@ describe('mineflayer-web-inventory tests', function () {
 
       socket.once('windowUpdate', (windowUpdate) => {
         assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-        assert.strictEqual(windowUpdate.type, bot.currentWindow?.type)
+        assert.strictEqual(windowUpdate.type, 'chest')
 
         assert.strictEqual(windowUpdate.slots[0]?.name, 'dirt')
         assert.strictEqual(windowUpdate.slots[0]?.count, 16)
@@ -216,12 +216,14 @@ describe('mineflayer-web-inventory tests', function () {
 
         socket.once('windowUpdate', (windowUpdate) => {
           assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-          assert.strictEqual(windowUpdate.type, bot.currentWindow?.type)
+          assert.strictEqual(windowUpdate.type, 'chest')
 
           assert.strictEqual(windowUpdate.slots[0], null)
           assert.strictEqual(windowUpdate.slots[27]?.name, 'dirt')
           assert.strictEqual(windowUpdate.slots[27]?.count, 16)
           assert(windowUpdate.slots[27]?.texture)
+
+          chest.close()
 
           done()
         })
@@ -299,13 +301,13 @@ describe('mineflayer-web-inventory tests', function () {
 
       socket.once('windowUpdate', (windowUpdate) => {
         assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-        assert.strictEqual(windowUpdate.type, bot.currentWindow?.type)
+        assert.strictEqual(windowUpdate.type, 'furnace')
 
         assert.strictEqual(windowUpdate.slots[30], null)
 
         socket.once('windowUpdate', (windowUpdate) => {
           assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-          assert.strictEqual(windowUpdate.type, bot.currentWindow?.type)
+          assert.strictEqual(windowUpdate.type, 'furnace')
 
           assert.strictEqual(windowUpdate.slots[31], null)
 
@@ -315,7 +317,7 @@ describe('mineflayer-web-inventory tests', function () {
 
               socket.once('windowUpdate', (windowUpdate) => {
                 assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-                assert.strictEqual(windowUpdate.type, bot.currentWindow?.type)
+                assert.strictEqual(windowUpdate.type, 'furnace')
 
                 assert.strictEqual(windowUpdate.slots[3]?.name, 'cooked_beef')
                 assert.strictEqual(windowUpdate.slots[3]?.count, 1)
@@ -323,11 +325,13 @@ describe('mineflayer-web-inventory tests', function () {
 
                 socket.once('windowUpdate', (windowUpdate) => {
                   assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-                  assert.strictEqual(windowUpdate.type, bot.currentWindow?.type)
+                  assert.strictEqual(windowUpdate.type, 'furnace')
 
                   assert.strictEqual(windowUpdate.slots[4]?.name, 'coal')
                   assert.strictEqual(windowUpdate.slots[4]?.count, 15)
                   assert(windowUpdate.slots[4]?.texture)
+
+                  furnace.close()
 
                   done()
                 })

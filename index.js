@@ -1,3 +1,5 @@
+const { getWindowName } = require('./utils')
+
 const DEFAULT_VERSION = '1.16'
 
 module.exports = function (bot, options) {
@@ -39,15 +41,18 @@ module.exports = function (bot, options) {
   })
 
   io.on('connection', (socket) => {
-    // On connection sends the initial state of the current window ?? inventory. Also adds each item's texture
-    const initialSlots = {}
-    const initialWindow = bot.currentWindow ?? bot.inventory
-    const initialItems = bot.currentWindow?.items() ?? bot.inventory.itemsRange(0, bot.inventory.inventoryEnd)
-    for (const item in initialItems) { // TODO: Try to simplify this
-      initialItems[item].texture = mcAssets.textureContent[initialItems[item].name].texture
-      initialSlots[initialItems[item].slot] = initialItems[item]
+    function emitWindow (window) {
+      const slots = {}
+      const items = window.id === 0 ? window.itemsRange(0, window.inventoryEnd) : window.items()
+      for (const item in items) { // TODO: Try to simplify this
+        items[item].texture = mcAssets.textureContent[items[item].name].texture
+        slots[items[item].slot] = items[item]
+      }
+      socket.emit('window', { id: window.id, type: getWindowName(window.type), slots })
     }
-    socket.emit('window', { id: initialWindow.id, type: initialWindow.type, slots: initialSlots })
+
+    // On connection sends the initial state of the current window ?? inventory
+    emitWindow(bot.currentWindow ?? bot.inventory)
 
     let updateObject = { id: null, type: null, slots: {} }
 
@@ -68,8 +73,8 @@ module.exports = function (bot, options) {
 
       if (updateObject.id == null && updateObject.type == null) {
         updateObject.id = window.id
-        updateObject.type = window.type
-      } else if (updateObject.id !== window.id || updateObject.type !== window.type) return
+        updateObject.type = getWindowName(window.type)
+      } else if (updateObject.id !== window.id || updateObject.type !== getWindowName(window.type)) return
 
       updateObject.slots[slot] = newItem
 
@@ -78,6 +83,8 @@ module.exports = function (bot, options) {
     bot.inventory.on('updateSlot', (slot, oldItem, newItem) => update(slot, oldItem, newItem, bot.inventory))
 
     const windowOpenHandler = (window) => {
+      emitWindow(window)
+
       const windowUpdateHandler = (slot, oldItem, newItem) => {
         update(slot, oldItem, newItem, window)
       }
@@ -85,6 +92,7 @@ module.exports = function (bot, options) {
 
       window.once('close', () => {
         window.removeListener('updateSlot', windowUpdateHandler)
+        emitWindow(bot.inventory)
       })
     }
     bot.on('windowOpen', windowOpenHandler)
