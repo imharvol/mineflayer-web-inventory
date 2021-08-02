@@ -50,7 +50,7 @@ module.exports = function (bot, options) {
       for (const item in slots) {
         if (slots[item]) slots[item] = addTexture(slots[item])
       }
-      socket.emit('window', { id: window.id, type: getWindowName(window.type), slots })
+      socket.emit('window', { id: window.id, type: getWindowName(window), slots })
     }
 
     // On connection sends the initial state of the current window or inventory if there's no window open
@@ -76,7 +76,7 @@ module.exports = function (bot, options) {
       // If the window has changed but there are updates from the older window still on the queue, we can just scrap those
       if ((bot.currentWindow ?? bot.inventory).id !== updateObject.id) {
         updateObject.id = window.id
-        updateObject.type = getWindowName(window.type)
+        updateObject.type = getWindowName(window)
         updateObject.slots = {}
       }
 

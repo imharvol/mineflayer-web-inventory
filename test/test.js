@@ -21,7 +21,7 @@ const serverProperties = {
 
 const minecraftVersion = '1.16'
 
-describe('mineflayer-web-inventory tests', function () {
+describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
   let bot, socket
   this.timeout(10 * 60 * 1000)
 
@@ -239,8 +239,13 @@ describe('mineflayer-web-inventory tests', function () {
     this.timeout(30 * 1000)
 
     bot.chat('/give test dirt 16\n')
-    bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest[facing=west,type=right]\n`)
-    bot.chat(`/setblock ${container2Pos.toArray().join(' ')} minecraft:chest[facing=west,type=left]\n`)
+    if (['1.8', '1.9', '1.10', '1.11', '1.12'].includes(bot.majorVersion)) {
+      bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest\n`)
+      bot.chat(`/setblock ${container2Pos.toArray().join(' ')} minecraft:chest\n`)
+    } else {
+      bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest[facing=west,type=right]\n`)
+      bot.chat(`/setblock ${container2Pos.toArray().join(' ')} minecraft:chest[facing=west,type=left]\n`)
+    }
 
     setTimeout(async () => {
       assert.strictEqual(bot.inventory.slots[36]?.name, 'dirt')
