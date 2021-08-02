@@ -9,10 +9,9 @@ socket.on('window', function (window) {
 socket.on('windowUpdate', function (windowUpdate) {
   if (windowUpdate.id !== windowComponent.window.id) return
 
-  // TODO: This works but it's not the best. For some reason the watch function was not
-  // being called when a slot changed, I tried to use Vue.set() but I couldn't get it to work
-  const newSlots = { ...windowComponent.window.slots, ...windowUpdate.slots }
-  windowComponent.window = { ...windowComponent.window, slots: newSlots }
+  for (const slot in windowUpdate.slots) {
+    Vue.set(windowComponent.window.slots, slot, windowUpdate.slots[slot])
+  }
 })
 
 const windowComponent = new Vue({
@@ -23,13 +22,15 @@ const windowComponent = new Vue({
   },
   computed: {
     isEmpty: function () {
-      return !!Object.values(this.window.slots).findIndex(e => e ?? false)
+      return Object.values(this.window.slots).findIndex(e => e != null) === -1
     }
   },
   watch: {
-    window: function (newWindow) {
-      console.log(newWindow)
-      this.throttleDrawWindow(newWindow)
+    window: {
+      deep: 'true', // We want to re-draw on any change to the object
+      handler: function (newWindow) {
+        this.throttleDrawWindow(newWindow)
+      }
     }
   },
   created: function () {
@@ -49,7 +50,7 @@ function drawWindow (window) {
     canvas.height = windowImage.height
     ctx.drawImage(windowImage, 0, 0)
   })
-  windowImage.src = `/public/windows/${window?.type ?? 'inventory'}.png`
+  windowImage.src = `public/windows/${window?.type ?? 'inventory'}.png`
 
   // Draw items
   for (const item in window.slots) {

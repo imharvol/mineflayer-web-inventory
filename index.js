@@ -33,27 +33,30 @@ module.exports = function (bot, options) {
     }
   }
 
-  // TODO: This should be path.join(webPath, 'public')
-  app.use('/public', express.static(path.join(__dirname, 'public')))
+  app.use(path.join(webPath, 'public'), express.static(path.join(__dirname, 'public')))
 
   app.get(webPath, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'))
   })
 
   io.on('connection', (socket) => {
+    function addTexture (item) {
+      if (!item) return item
+      item.texture = mcAssets.textureContent[item.name].texture
+      return item
+    }
     function emitWindow (window) {
-      const slots = {}
-      const items = window.id === 0 ? window.itemsRange(0, window.inventoryEnd) : window.items()
-      for (const item in items) { // TODO: Try to simplify this
-        items[item].texture = mcAssets.textureContent[items[item].name].texture
-        slots[items[item].slot] = items[item]
+      const slots = Object.assign({}, window.slots)
+      for (const item in slots) {
+        if (slots[item]) slots[item] = addTexture(slots[item])
       }
       socket.emit('window', { id: window.id, type: getWindowName(window.type), slots })
     }
 
-    // On connection sends the initial state of the current window ?? inventory
+    // On connection sends the initial state of the current window or inventory if there's no window open
     emitWindow(bot.currentWindow ?? bot.inventory)
 
+    // Updates are queued here to allow debouncing the 'windowUpdate' event
     let updateObject = { id: null, type: null, slots: {} }
 
     const debounceUpdate = _.debounce(() => {
@@ -64,17 +67,18 @@ module.exports = function (bot, options) {
     function update (slot, oldItem, newItem, window) {
       if (bot.currentWindow && window.id !== bot.currentWindow.id) return
 
-      // Use copies of oldItem and newItem to avoid modifying the internal state of mineflayerº
+      // Use copies of oldItem and newItem to avoid modifying the internal state of mineflayer
       if (oldItem) oldItem = Object.assign({}, oldItem)
       if (newItem) newItem = Object.assign({}, newItem)
 
-      // Add item texture
-      if (newItem) newItem.texture = mcAssets.textureContent[newItem.name].texture
+      if (newItem) newItem = addTexture(newItem)
 
-      if (updateObject.id == null && updateObject.type == null) {
+      // If the window has changed but there are updates from the older window still on the queue, we can just scrap those
+      if ((bot.currentWindow ?? bot.inventory).id !== updateObject.id) {
         updateObject.id = window.id
         updateObject.type = getWindowName(window.type)
-      } else if (updateObject.id !== window.id || updateObject.type !== getWindowName(window.type)) return
+        updateObject.slots = {}
+      }
 
       updateObject.slots[slot] = newItem
 
@@ -91,8 +95,8 @@ module.exports = function (bot, options) {
       window.on('updateSlot', windowUpdateHandler)
 
       window.once('close', () => {
-        window.removeListener('updateSlot', windowUpdateHandler)
         emitWindow(bot.inventory)
+        window.removeListener('updateSlot', windowUpdateHandler)
       })
     }
     bot.on('windowOpen', windowOpenHandler)
@@ -108,7 +112,7 @@ module.exports = function (bot, options) {
     stop()
   })
 
-  if (options.startOnLoad || options.startOnLoad === undefined || options.startOnLoad === null) start() // Start the server by default when the plugin is loaded
+  if (options.startOnLoad || options.startOnLoad == null) start() // Start the server by default when the plugin is loaded
 
   function start (cb) {
     cb = cb || noop

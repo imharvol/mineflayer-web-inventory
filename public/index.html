@@ -5,24 +5,28 @@
 <head>
   <title>Mineflayer inventory viewer</title>
 
+  <script>
+    // Redirect so we can use relative paths
+    if (!document.location.href.endsWith('/')) document.location.href = document.location.href + '/'
+  </script>
+
   <script src="https://unpkg.com/vue"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
 
-  <link rel="stylesheet" type="text/css" href="/public/index.css">
+  <link rel="stylesheet" type="text/css" href="public/index.css">
 </head>
 
 <body>
   <div id="canvas">
     <canvas id="windowCanvas" width="352" height="332">
-      <img id="windowImage" src="/public/windows/inventory.png">
+      <img id="windowImage" src="public/windows/inventory.png">
       <span>Upgrade your browser to see the graphical inventory</span>
     </canvas>
   </div>
 
   <div id="window">
-    <button v-if="showJSON" v-on:click="showJSON = false">Hide JSON</button>
-    <button v-if="!showJSON" v-on:click="showJSON = true">Show JSON</button>
+    <button v-on:click="showJSON = !showJSON">{{ showJSON ? 'Hide JSON' : 'Show JSON' }}</button>
 
     <span v-if="isEmpty">No items</span>
 
@@ -35,8 +39,8 @@
     <pre v-if="showJSON">{{ JSON.stringify(window, null, 2) }}</pre>
   </div>
 
-  <script src="/public/inventory-coords.js"></script>
-  <script src="/public/index.js"></script>
+  <script src="public/inventory-coords.js"></script>
+  <script src="public/index.js"></script>
 </body>
 
 </html>

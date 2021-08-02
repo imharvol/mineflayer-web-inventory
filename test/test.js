@@ -7,6 +7,7 @@ const mineflayer = require('mineflayer')
 const socketioClient = require('socket.io-client')
 const inventoryViewer = require('../')
 const vec3 = require('vec3')
+const open = require('open')
 
 const serverProperties = {
   'level-type': 'FLAT',
@@ -61,6 +62,7 @@ describe('mineflayer-web-inventory tests', function () {
         // Start the inventory viewer
         console.log('TEST:', `Starting Inventory Viewer on http://localhost:${inventoryViewerPort}`)
         inventoryViewer(bot, { port: inventoryViewerPort })
+        if (process.argv[2] === '--browser') open(`http://localhost:${inventoryViewerPort}`)
 
         bot.once('spawn', () => {
           server.writeServer('op test\n')
