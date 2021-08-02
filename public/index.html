@@ -12,31 +12,31 @@
   <link rel="stylesheet" type="text/css" href="/public/index.css">
 </head>
 
-<body onload="drawInventory()">
+<body>
   <div id="canvas">
-    <canvas id="inventoryCanvas" width="352" height="332">
-      <img id="inventoryImage" src="/public/PackInventoryWindow.png">
+    <canvas id="windowCanvas" width="352" height="332">
+      <img id="windowImage" src="/public/windows/inventory.png">
       <span>Upgrade your browser to see the graphical inventory</span>
     </canvas>
   </div>
 
-  <div id="inventory">
+  <div id="window">
     <button v-if="showJSON" v-on:click="showJSON = false">Hide JSON</button>
     <button v-if="!showJSON" v-on:click="showJSON = true">Show JSON</button>
 
-    <span v-if="Object.keys(inventory).length === 0">No items</span>
+    <span v-if="isEmpty">No items</span>
 
     <ul>
-      <li v-for="item in inventory">
+      <li v-for="item of Object.values(window.slots)" v-if="item">
         <img v-bind:src="item.texture"> {{ item.displayName }}: {{ item.count }}
       </li>
     </ul>
 
-    <pre v-if="showJSON">{{ JSON.stringify(inventory, null, 2) }}</pre>
+    <pre v-if="showJSON">{{ JSON.stringify(window, null, 2) }}</pre>
   </div>
 
+  <script src="/public/inventory-coords.js"></script>
   <script src="/public/index.js"></script>
-
 </body>
 
 </html>
