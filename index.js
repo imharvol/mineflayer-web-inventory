@@ -46,11 +46,25 @@ module.exports = function (bot, options) {
       return item
     }
     function emitWindow (window) {
+      // Use a copy of window to avoid modifying the internal state of mineflayer
+      window = Object.assign({}, window)
+
+      const windowUpdate = { id: window.id, type: getWindowName(window), slots: {} }
+
+      // If the window is not supported, we transform it into a inventory update
+      if (!windowUpdate.type) {
+        windowUpdate.id = bot.inventory.id
+        windowUpdate.type = getWindowName(bot.inventory)
+        window.slots = Array(9).fill(null, 0, 9).concat(window.slots.slice(window.inventoryStart, window.inventoryEnd)) // The 9 empty slots that we add are the armor and crafting slots that are not included in inventoryStart and inventoryEnd
+        window.slots.forEach(item => { if (item) item.slot -= window.inventoryStart - 9 })
+      }
+
       const slots = Object.assign({}, window.slots)
       for (const item in slots) {
         if (slots[item]) slots[item] = addTexture(slots[item])
       }
-      socket.emit('window', { id: window.id, type: getWindowName(window), slots })
+      windowUpdate.slots = slots
+      socket.emit('window', windowUpdate)
     }
 
     // On connection sends the initial state of the current window or inventory if there's no window open
@@ -65,20 +79,29 @@ module.exports = function (bot, options) {
     }, debounceTime)
 
     function update (slot, oldItem, newItem, window) {
-      if (bot.currentWindow && window.id !== bot.currentWindow.id) return
-
       // Use copies of oldItem and newItem to avoid modifying the internal state of mineflayer
       if (oldItem) oldItem = Object.assign({}, oldItem)
       if (newItem) newItem = Object.assign({}, newItem)
 
-      if (newItem) newItem = addTexture(newItem)
+      if (!getWindowName(window)) { // If the update comes from an unsupported window, we transform it into a inventory update
+        updateObject.id = bot.inventory.id
+        updateObject.type = getWindowName(bot.inventory)
 
-      // If the window has changed but there are updates from the older window still on the queue, we can just scrap those
-      if ((bot.currentWindow ?? bot.inventory).id !== updateObject.id) {
-        updateObject.id = window.id
-        updateObject.type = getWindowName(window)
-        updateObject.slots = {}
+        slot -= window.inventoryStart - 9
+        if (newItem) newItem.slot = slot
+      } else {
+        // If the update comes from a window different to the current window, we can just ignore it
+        if (bot.currentWindow && window.id !== bot.currentWindow.id) return
+
+        // If the window has changed but there are updates from the older window still on the queue, we can just scrap those
+        if ((bot.currentWindow ?? bot.inventory).id !== updateObject.id) {
+          updateObject.id = window.id
+          updateObject.type = getWindowName(window)
+          updateObject.slots = {}
+        }
       }
+
+      if (newItem) newItem = addTexture(newItem)
 
       updateObject.slots[slot] = newItem
 

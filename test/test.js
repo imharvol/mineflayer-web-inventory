@@ -8,6 +8,7 @@ const socketioClient = require('socket.io-client')
 const inventoryViewer = require('../')
 const vec3 = require('vec3')
 const open = require('open')
+const { setFailStreak } = require('../utils')
 
 const serverProperties = {
   'level-type': 'FLAT',
@@ -89,7 +90,7 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
     })
   })
 
-  it('\'inventory\' Event', function (done) {
+  it('\'window\' Event', function (done) {
     this.timeout(10 * 1000)
 
     bot.chat('/give test pumpkin 32\n') // Slot 36
@@ -153,7 +154,7 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
 
       const chest = await bot.openContainer(bot.blockAt(container1Pos))
 
-      await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is openned that and that we don't want
+      await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is opened that and that we don't want
 
       socket.once('windowUpdate', (windowUpdate) => {
         assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
@@ -205,7 +206,7 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
 
       const chest = await bot.openContainer(bot.blockAt(container1Pos))
 
-      await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is openned that and that we don't want
+      await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is opened that and that we don't want
 
       socket.once('windowUpdate', (windowUpdate) => {
         assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
@@ -253,7 +254,7 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
 
       const chest = await bot.openContainer(bot.blockAt(container1Pos))
 
-      await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is openned that and that we don't want
+      await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is opened that and that we don't want
 
       socket.once('windowUpdate', (windowUpdate) => {
         assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
@@ -310,7 +311,7 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
 
       const furnace = await bot.openFurnace(bot.blockAt(container1Pos))
 
-      await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is openned that and that we don't want
+      await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is opened that and that we don't want
 
       socket.once('windowUpdate', (windowUpdate) => {
         assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
@@ -361,8 +362,47 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
     }, 2500)
   })
 
-  // TODO: Add tests for armor slots
+  // Opens and updates an unsupported window. The bot should receive inventory updates instead of updates from an unknown window
+  it('Unsupported window', function (done) {
+    this.timeout(30 * 1000)
+
+    bot.chat('/give test dirt 16\n') // Slot 36
+    bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest\n`)
+
+    setTimeout(async () => {
+      assert.strictEqual(bot.inventory.slots[36]?.name, 'dirt')
+      assert.strictEqual(bot.inventory.slots[36]?.count, 16)
+
+      // We want getWindowName to return null once to simulate an unknown window
+      setFailStreak([true, false, true])
+
+      socket.once('window', (window) => {
+        assert.strictEqual(window.id, 0)
+        assert.strictEqual(window.type, 'inventory')
+
+        assert.strictEqual(window.slots[36]?.name, 'dirt')
+        assert.strictEqual(window.slots[36]?.count, 16)
+        assert(window.slots[36]?.texture)
+
+        socket.on('windowUpdate', (windowUpdate) => {
+          assert.strictEqual(windowUpdate.id, 0)
+          assert.strictEqual(windowUpdate.type, 'inventory')
+
+          assert.strictEqual(windowUpdate.slots[36]?.name, 'dirt')
+          assert.strictEqual(windowUpdate.slots[36]?.count, 16)
+          assert(windowUpdate.slots[36]?.texture)
+
+          chest.close()
+
+          done()
+        })
+      })
+      const chest = await bot.openContainer(bot.blockAt(container1Pos))
+    }, 2500)
+  })
+
   // TODO: Add tests that check that a 'window' event is emitted when a window (that is not the inventory) is opened/closed
+  // TODO: Check also that the item slot is set correctly (not only the position in the array)
 
   afterEach('Reset State', function (done) {
     this.timeout(15 * 1000)
