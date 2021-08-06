@@ -4,7 +4,6 @@ const DEFAULT_VERSION = '1.16'
 
 module.exports = function (bot, options) {
   options = options || {}
-  const webPath = options.path || '/'
   const express = options.express || require('express')
   const app = options.app || express()
   const http = options.http || require('http').createServer(app)
@@ -33,9 +32,9 @@ module.exports = function (bot, options) {
     }
   }
 
-  app.use(path.join(webPath, 'public'), express.static(path.join(__dirname, 'public')))
+  app.use('/public', express.static(path.join(__dirname, 'public')))
 
-  app.get(webPath, (req, res) => {
+  app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'))
   })
 

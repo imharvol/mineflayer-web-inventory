@@ -50,7 +50,7 @@ function drawWindow (window) {
     canvas.height = windowImage.height
     ctx.drawImage(windowImage, 0, 0)
   })
-  windowImage.src = `public/windows/${window?.type ?? 'inventory'}.png`
+  windowImage.src = `/public/windows/${window?.type ?? 'inventory'}.png`
 
   // Draw items
   for (const item in window.slots) {
