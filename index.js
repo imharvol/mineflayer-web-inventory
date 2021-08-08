@@ -33,9 +33,8 @@ module.exports = function (bot, options) {
     }
   }
 
-  const publicPath = webPath.endsWith('/') ? webPath + 'public' : webPath + '/public';
+  const publicPath = webPath.endsWith('/') ? webPath + 'public' : webPath + '/public'
   app.use(publicPath, express.static(path.join(__dirname, 'public')))
-
 
   app.get(webPath, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'))
