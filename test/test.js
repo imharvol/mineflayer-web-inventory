@@ -62,7 +62,7 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
 
         // Start the inventory viewer
         console.log('TEST:', `Starting Inventory Viewer on http://localhost:${inventoryViewerPort}`)
-        inventoryViewer(bot, { port: inventoryViewerPort })
+        inventoryViewer(bot, { port: inventoryViewerPort, debounceTime: 0 })
         if (process.argv[2] === '--browser') open(`http://localhost:${inventoryViewerPort}`)
 
         bot.once('spawn', () => {
@@ -401,7 +401,6 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
     }, 2500)
   })
 
-  // TODO: Add tests that check that a 'window' event is emitted when a window (that is not the inventory) is opened/closed
   // TODO: Check also that the item slot is set correctly (not only the position in the array)
 
   afterEach('Reset State', function (done) {

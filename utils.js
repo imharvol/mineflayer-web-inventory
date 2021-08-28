@@ -1,7 +1,7 @@
 const windowNamesOrig = {
   inventory: ['minecraft:inventory'],
   chest: ['minecraft:generic_9x3', 'minecraft:chest'],
-  'crafting-table': ['minecraft:crafting'],
+  'crafting-table': ['minecraft:crafting', 'minecraft:crafting_table'],
   furnace: ['minecraft:furnace'],
   'large-chest': ['minecraft:generic_9x6', 'minecraft:chest']
 }

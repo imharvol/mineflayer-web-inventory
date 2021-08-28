@@ -1,5 +1,7 @@
 /* global io, Vue, Image, _, windowSlotsCoords */
 
+const drawWindowThrottle = 100
+
 const socket = io()
 
 socket.on('window', function (window) {
@@ -34,7 +36,7 @@ const windowComponent = new Vue({
     }
   },
   created: function () {
-    this.throttleDrawWindow = _.throttle(drawWindow, 100)
+    this.throttleDrawWindow = _.throttle(drawWindow, drawWindowThrottle)
   }
 })
 

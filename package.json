@@ -1,6 +1,6 @@
 {
   "name": "mineflayer-web-inventory",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "Web based viewer for your mineflayer bot's inventory",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,7 @@
     "lodash": "^4.17.21",
     "minecraft-assets": "^1.6.0",
     "minecraft-data": "^2.88.0",
-    "prismarine-windows": "https://github.com/PrismarineJS/prismarine-windows.git#e030f99ae5024ad413908ac929631b164b2e3570",
+    "prismarine-windows": "^2.4.1",
     "socket.io": "^3.1.1",
     "vec3": "^0.1.7"
   },
