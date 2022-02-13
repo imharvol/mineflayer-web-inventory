@@ -119,3 +119,7 @@ test/server/
 test/server.jar
 
 versions/
+
+# For standard to work:
+client/node_modules/
+client/public/build/
