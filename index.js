@@ -2,15 +2,16 @@ const { getWindowName } = require('./utils')
 
 const DEFAULT_VERSION = '1.16'
 
-module.exports = function (bot, options) {
-  options = options ?? {}
-  const webPath = options.path ?? '/'
+module.exports = function (bot, options = {}) {
+  options.webPath = options.webPath ?? options.path ?? '/'
   const express = options.express ?? require('express')
   const app = options.app ?? express()
   const http = options.http ?? require('http').createServer(app)
   const io = options.io ?? require('socket.io')(http)
   options.port = options.port ?? 3000
   options.windowUpdateDebounceTime = options.windowUpdateDebounceTime ?? options.debounceTime ?? 100
+
+  if (!options.webPath.startsWith('/')) options.webPath = '/' + options.webPath
 
   const path = require('path')
   const _ = require('lodash')
@@ -57,12 +58,7 @@ module.exports = function (bot, options) {
     }
   }
 
-  const publicPath = webPath.endsWith('/') ? webPath + 'public' : webPath + '/public'
-  app.use(publicPath, express.static(path.join(__dirname, 'public')))
-
-  app.get(webPath, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'))
-  })
+  app.use(options.webPath, express.static(path.join(__dirname, 'client', 'public')))
 
   io.on('connection', (socket) => {
     function addTexture (item) {

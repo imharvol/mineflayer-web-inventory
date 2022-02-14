@@ -32,7 +32,7 @@ You can change the options using:
 ```js
   let options = {
     port: PORT,
-    path: PATH,
+    webPath: PATH,
     express: EXPRESS,
     app: APP,
     http: HTTP,

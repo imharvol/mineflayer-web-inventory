@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "rollup -c",
+    "generateWindowsCoordinates": "node scripts/generateWindowsCoordinates.js",
+    "build": "rollup -c && npm run generateWindowsCoordinates",
     "dev": "rollup -c -w",
     "start": "sirv public --no-clear"
   },
@@ -18,6 +19,7 @@
     "svelte": "^3.0.0"
   },
   "dependencies": {
+    "lodash": "^4.17.21",
     "sirv-cli": "^2.0.0"
   }
 }

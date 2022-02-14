@@ -4,6 +4,7 @@
   "description": "Web based viewer for your mineflayer bot's inventory",
   "main": "index.js",
   "scripts": {
+    "build": "cd client && npm run build",
     "test": "npm run lint && mocha",
     "lint": "standard",
     "clean": "rm -rf test/server/ test/server.jar versions/"
