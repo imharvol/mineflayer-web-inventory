@@ -3,22 +3,46 @@ const { getWindowName } = require('./utils')
 const DEFAULT_VERSION = '1.16'
 
 module.exports = function (bot, options) {
-  options = options || {}
-  const webPath = options.path || '/'
-  const express = options.express || require('express')
-  const app = options.app || express()
-  const http = options.http || require('http').createServer(app)
-  const io = options.io || require('socket.io')(http)
-  const port = options.port || 3000
-  const debounceTime = options.debounceTime || 100
+  options = options ?? {}
+  const webPath = options.path ?? '/'
+  const express = options.express ?? require('express')
+  const app = options.app ?? express()
+  const http = options.http ?? require('http').createServer(app)
+  const io = options.io ?? require('socket.io')(http)
+  options.port = options.port ?? 3000
+  options.windowUpdateDebounceTime = options.windowUpdateDebounceTime ?? options.debounceTime ?? 100
 
   const path = require('path')
   const _ = require('lodash')
+  const { callbackify } = require('util')
 
   bot.webInventory = {
     options,
-    start,
-    stop
+    isRunning: false
+  }
+
+  const start = () => {
+    return new Promise((resolve, reject) => {
+      if (bot.webInventory.isRunning) return reject(new Error('(mineflayer-web-inventory) INFO: mineflayer-web-inventory is already running'))
+
+      http.listen(options.port, () => {
+        bot.webInventory.isRunning = true
+        console.log(`(mineflayer-web-inventory) INFO: Inventory web server running on *:${options.port}`)
+        resolve()
+      })
+    })
+  }
+
+  const stop = () => {
+    return new Promise((resolve, reject) => {
+      if (!bot.webInventory.isRunning) return reject(new Error('(mineflayer-web-inventory) INFO: mineflayer-web-inventory is not running'))
+
+      http.close(() => {
+        bot.webInventory.isRunning = false
+        console.log('(mineflayer-web-inventory) INFO: Inventory web server closed')
+        resolve()
+      })
+    })
   }
 
   // Try to load mcAssets
@@ -26,9 +50,9 @@ module.exports = function (bot, options) {
   if (!mcAssets) {
     mcAssets = require('minecraft-assets')(DEFAULT_VERSION)
     if (mcAssets) {
-      console.log(`(web-inventory) WARNING: Please, specify a bot.version or web-inventory may not work properly. Using version ${DEFAULT_VERSION} for minecraft-assets`)
+      console.log(`(mineflayer-web-inventory) WARNING: Please, specify a bot.version or mineflayer-web-inventory may not work properly. Using version ${DEFAULT_VERSION} for minecraft-assets`)
     } else {
-      console.log('(web-inventory) ERROR: Couldn\'t load minecraft-assets')
+      console.log('(mineflayer-web-inventory) ERROR: Couldn\'t load minecraft-assets')
       return
     }
   }
@@ -46,6 +70,7 @@ module.exports = function (bot, options) {
       item.texture = mcAssets.textureContent[item.name].texture
       return item
     }
+
     function emitWindow (window) {
       // Use a copy of window to avoid modifying the internal state of mineflayer
       window = Object.assign({}, window)
@@ -72,12 +97,13 @@ module.exports = function (bot, options) {
     emitWindow(bot.currentWindow ?? bot.inventory)
 
     // Updates are queued here to allow debouncing the 'windowUpdate' event
-    let updateObject = { id: null, type: null, slots: {} }
+    const defaultUpdateObject = { id: null, type: null, slots: {} }
+    let updateObject = defaultUpdateObject
 
     const debounceUpdate = _.debounce(() => {
       socket.emit('windowUpdate', updateObject)
-      updateObject = { id: null, type: null, slots: {} }
-    }, debounceTime)
+      updateObject = defaultUpdateObject
+    }, bot.webInventory.options.windowUpdateDebounceTime)
 
     function update (slot, oldItem, newItem, window) {
       // Use copies of oldItem and newItem to avoid modifying the internal state of mineflayer
@@ -119,7 +145,7 @@ module.exports = function (bot, options) {
       window.on('updateSlot', windowUpdateHandler)
 
       window.once('close', () => {
-        emitWindow(bot.inventory)
+        emitWindow(bot.currentWindow ?? bot.inventory)
         window.removeListener('updateSlot', windowUpdateHandler)
       })
     }
@@ -132,33 +158,13 @@ module.exports = function (bot, options) {
     })
   })
 
-  bot.once('end', () => {
-    stop()
-  })
+  bot.once('end', stop)
 
-  if (options.startOnLoad || options.startOnLoad == null) start() // Start the server by default when the plugin is loaded
+  if (options.startOnLoad !== false) start() // Start the server by default when the plugin is loaded
 
-  function start (cb) {
-    cb = cb || noop
-    if (bot.webInventory.isRunning) return cb(new Error('(web-inventory) INFO: web-inventory is already running'))
-
-    http.listen(port, () => {
-      bot.webInventory.isRunning = true
-      console.log(`(web-inventory) INFO: Inventory web server running on *:${port}`)
-      cb()
-    })
-  }
-
-  function stop (cb) {
-    cb = cb || noop
-    if (!bot.webInventory.isRunning) return cb(new Error('(web-inventory) INFO: web-inventory is not running'))
-
-    http.close(() => {
-      bot.webInventory.isRunning = false
-      console.log('(web-inventory) INFO: Inventory web server closed')
-      cb()
-    })
+  bot.webInventory = {
+    ...bot.webInventory,
+    start: callbackify(start),
+    stop: callbackify(stop)
   }
 }
-
-function noop () {}

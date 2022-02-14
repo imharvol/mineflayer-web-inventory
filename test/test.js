@@ -62,7 +62,7 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
 
         // Start the inventory viewer
         console.log('TEST:', `Starting Inventory Viewer on http://localhost:${inventoryViewerPort}`)
-        inventoryViewer(bot, { port: inventoryViewerPort, debounceTime: 0 })
+        inventoryViewer(bot, { port: inventoryViewerPort, windowUpdateDebounceTime: 100 })
         if (process.argv[2] === '--browser') open(`http://localhost:${inventoryViewerPort}`)
 
         bot.once('spawn', () => {

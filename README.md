@@ -38,18 +38,20 @@ You can change the options using:
     http: HTTP,
     io: IO,
     startOnLoad: BOOLEAN,
-    debounceTime: INT
+    windowUpdateDebounceTime: INT
   }
 
   inventoryViewer(bot, options)
 ```
 You can access the options in bot.webInventory.options
 
-#### bot.webInventory.start([cb])
-Starts the web server. This function is called when the plugin is first loaded unless `options.startOnLoad` is `false`
+#### bot.webInventory.start()
+Starts the web server. This function is called when the plugin is first loaded unless `options.startOnLoad` is `false`. Returns a `Promise` that resolves once the HTTP server is open.
 
-#### bot.webInventory.stop([cb])
-Stops the web server. You can check the current status of the web server using `bot.webInventory.isRunning` which returns a boolean
+#### bot.webInventory.stop()
+Stops the web server. Returns a `Promise` that resolves once the HTTP server is closed.
+
+You can also check the current status of the web server using `bot.webInventory.isRunning` which returns a boolean
 
 ## Screenshots
 ![Example Screenshot 1](https://user-images.githubusercontent.com/17525823/128013976-493448e3-aa22-43bc-8fb9-428f1ccf9b5f.png)
