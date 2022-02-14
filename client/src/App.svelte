@@ -102,10 +102,10 @@
 <main>
   <!-- Canvas -->
   <canvas bind:this={canvas} id="windowCanvas" width="352" height="332">
-    <span
-      >Upgrade your browser and/or activate JavaScript to see the graphical
-      inventory</span
-    >
+    <p>
+      Upgrade your browser and/or activate JavaScript to see the graphical
+      inventory
+    </p>
   </canvas>
 
   <!-- Buttons -->

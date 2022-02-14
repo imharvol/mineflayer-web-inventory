@@ -9,6 +9,7 @@ const inventoryViewer = require('../')
 const vec3 = require('vec3')
 const open = require('open')
 const { setFailStreak } = require('../utils')
+const { once } = require('events')
 
 const serverProperties = {
   'level-type': 'FLAT',
@@ -21,6 +22,8 @@ const serverProperties = {
 }
 
 const minecraftVersion = '1.16'
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
 describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
   let bot, socket
@@ -90,153 +93,144 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
     })
   })
 
-  it('\'window\' Event', function (done) {
+  it('\'window\' Event', async function () {
     this.timeout(10 * 1000)
 
     bot.chat('/give test pumpkin 32\n') // Slot 36
     bot.chat('/give test melon 16\n') // Slot 37
     bot.chat('/give test iron_helmet 1\n') // Slot 38, equipped to slot 5
 
-    setTimeout(() => {
-      bot.equip(mcData.itemsByName.iron_helmet.id, 'head', () => {
-        setTimeout(() => {
-          const tmpSocket = socketioClient(`http://localhost:${inventoryViewerPort}/`).connect()
-          tmpSocket.once('window', (window) => {
-            assert.strictEqual(window.id, 0)
-            assert.strictEqual(window.type, 'inventory')
+    await sleep(1000)
 
-            assert.strictEqual(window.slots[5]?.name, 'iron_helmet')
-            assert.strictEqual(window.slots[5]?.count, 1)
-            assert(window.slots[5]?.texture)
-            assert.strictEqual(window.slots[36]?.name, 'pumpkin')
-            assert.strictEqual(window.slots[36]?.count, 32)
-            assert(window.slots[36]?.texture)
-            assert.strictEqual(window.slots[37]?.name, 'melon')
-            assert.strictEqual(window.slots[37]?.count, 16)
-            assert(window.slots[37]?.texture)
+    await bot.equip(mcData.itemsByName.iron_helmet.id, 'head')
 
-            tmpSocket.disconnect()
+    await sleep(1000)
 
-            done()
-          })
-        }, 1000)
-      })
-    }, 1000)
+    const tmpSocket = socketioClient(`http://localhost:${inventoryViewerPort}/`).connect()
+    const [window] = await once(tmpSocket, 'window')
+
+    assert.strictEqual(window.id, 0)
+    assert.strictEqual(window.type, 'inventory')
+
+    assert.strictEqual(window.slots[5]?.name, 'iron_helmet')
+    assert.strictEqual(window.slots[5]?.count, 1)
+    assert(window.slots[5]?.texture)
+    assert.strictEqual(window.slots[36]?.name, 'pumpkin')
+    assert.strictEqual(window.slots[36]?.count, 32)
+    assert(window.slots[36]?.texture)
+    assert.strictEqual(window.slots[37]?.name, 'melon')
+    assert.strictEqual(window.slots[37]?.count, 16)
+    assert(window.slots[37]?.texture)
+
+    tmpSocket.disconnect()
   })
 
-  it('\'windowUpdate\' Event', function (done) {
+  it('\'windowUpdate\' Event', async function () {
     this.timeout(10 * 1000)
 
     bot.chat('/give test dirt 16\n') // Slot 36
 
-    socket.once('windowUpdate', (windowUpdate) => {
-      assert.strictEqual(windowUpdate.id, 0)
-      assert.strictEqual(windowUpdate.type, 'inventory')
+    const [windowUpdate] = await once(socket, 'windowUpdate')
 
-      assert.strictEqual(windowUpdate.slots[36]?.name, 'dirt')
-      assert.strictEqual(windowUpdate.slots[36]?.count, 16)
-      assert(windowUpdate.slots[36]?.texture)
+    assert.strictEqual(windowUpdate.id, 0)
+    assert.strictEqual(windowUpdate.type, 'inventory')
 
-      done()
-    })
+    assert.strictEqual(windowUpdate.slots[36]?.name, 'dirt')
+    assert.strictEqual(windowUpdate.slots[36]?.count, 16)
+    assert(windowUpdate.slots[36]?.texture)
   })
 
   // Check that the inventory is updated even when a chest is open (even though it should work with other windows)
-  it('Chest Updates Using moveSlotItem', function (done) {
+  it('Chest Updates Using moveSlotItem', async function () {
     this.timeout(30 * 1000)
 
     bot.chat('/give test dirt 16\n') // Slot 54
     bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest\n`)
 
-    setTimeout(async () => {
-      assert.strictEqual(bot.inventory.slots[36]?.name, 'dirt')
-      assert.strictEqual(bot.inventory.slots[36]?.count, 16)
+    await sleep(2500)
 
-      const chest = await bot.openContainer(bot.blockAt(container1Pos))
+    assert.strictEqual(bot.inventory.slots[36]?.name, 'dirt')
+    assert.strictEqual(bot.inventory.slots[36]?.count, 16)
 
-      await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is opened that and that we don't want
+    const chest = await bot.openContainer(bot.blockAt(container1Pos))
 
-      socket.once('windowUpdate', (windowUpdate) => {
-        assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-        assert.strictEqual(windowUpdate.type, 'chest')
+    await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is opened that and that we don't want
 
-        assert.strictEqual(windowUpdate.slots[0]?.name, 'dirt')
-        assert.strictEqual(windowUpdate.slots[0]?.count, 16)
-        assert(windowUpdate.slots[0]?.texture)
-        assert.strictEqual(windowUpdate.slots[54], null)
+    bot.moveSlotItem(54, 0)
+    const [windowUpdate1] = await once(socket, 'windowUpdate')
 
-        socket.once('windowUpdate', (windowUpdate) => {
-          assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-          assert.strictEqual(windowUpdate.type, 'chest')
+    assert.strictEqual(windowUpdate1.id, bot.currentWindow?.id)
+    assert.strictEqual(windowUpdate1.type, 'chest')
 
-          assert.strictEqual(windowUpdate.slots[56]?.name, 'dirt')
-          assert.strictEqual(windowUpdate.slots[56]?.count, 16)
-          assert(windowUpdate.slots[56]?.texture)
-          assert.strictEqual(windowUpdate.slots[0], null)
+    assert.strictEqual(windowUpdate1.slots[0]?.name, 'dirt')
+    assert.strictEqual(windowUpdate1.slots[0]?.count, 16)
+    assert(windowUpdate1.slots[0]?.texture)
+    assert.strictEqual(windowUpdate1.slots[54], null)
 
-          socket.once('windowUpdate', (windowUpdate) => {
-            assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-            assert.strictEqual(windowUpdate.type, 'chest')
+    bot.moveSlotItem(0, 56)
+    const [windowUpdate2] = await once(socket, 'windowUpdate')
 
-            assert.strictEqual(windowUpdate.slots[54]?.name, 'pumpkin')
-            assert.strictEqual(windowUpdate.slots[54]?.count, 32)
-            assert(windowUpdate.slots[54]?.texture)
+    assert.strictEqual(windowUpdate2.id, bot.currentWindow?.id)
+    assert.strictEqual(windowUpdate2.type, 'chest')
 
-            chest.close()
+    assert.strictEqual(windowUpdate2.slots[56]?.name, 'dirt')
+    assert.strictEqual(windowUpdate2.slots[56]?.count, 16)
+    assert(windowUpdate2.slots[56]?.texture)
+    assert.strictEqual(windowUpdate2.slots[0], null)
 
-            done()
-          })
-          bot.chat('/give test pumpkin 32\n') // Slot 54
-        })
-        bot.moveSlotItem(0, 56, noop)
-      })
-      bot.moveSlotItem(54, 0, noop)
-    }, 2500)
+    bot.chat('/give test pumpkin 32\n') // Slot 54
+    const [windowUpdate3] = await once(socket, 'windowUpdate')
+
+    assert.strictEqual(windowUpdate3.id, bot.currentWindow?.id)
+    assert.strictEqual(windowUpdate3.type, 'chest')
+
+    assert.strictEqual(windowUpdate3.slots[54]?.name, 'pumpkin')
+    assert.strictEqual(windowUpdate3.slots[54]?.count, 32)
+    assert(windowUpdate3.slots[54]?.texture)
+
+    chest.close()
   })
 
-  it('Chest Updates Using deposit and withdraw', function (done) {
+  it('Chest Updates Using deposit and withdraw', async function () {
     this.timeout(30 * 1000)
 
     bot.chat('/give test dirt 16\n') // Slot 54
     bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest\n`)
 
-    setTimeout(async () => {
-      assert.strictEqual(bot.inventory.slots[36]?.name, 'dirt')
-      assert.strictEqual(bot.inventory.slots[36]?.count, 16)
+    await sleep(2500)
 
-      const chest = await bot.openContainer(bot.blockAt(container1Pos))
+    assert.strictEqual(bot.inventory.slots[36]?.name, 'dirt')
+    assert.strictEqual(bot.inventory.slots[36]?.count, 16)
 
-      await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is opened that and that we don't want
+    const chest = await bot.openContainer(bot.blockAt(container1Pos))
+    await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is opened that and that we don't want
 
-      socket.once('windowUpdate', (windowUpdate) => {
-        assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-        assert.strictEqual(windowUpdate.type, 'chest')
+    chest.deposit(mcData.itemsByName.dirt.id, null, 16) // Moves from slot 54 to slot 0
+    const [windowUpdate1] = await once(socket, 'windowUpdate')
 
-        assert.strictEqual(windowUpdate.slots[0]?.name, 'dirt')
-        assert.strictEqual(windowUpdate.slots[0]?.count, 16)
-        assert(windowUpdate.slots[0]?.texture)
-        assert.strictEqual(windowUpdate.slots[54], null)
+    assert.strictEqual(windowUpdate1.id, bot.currentWindow?.id)
+    assert.strictEqual(windowUpdate1.type, 'chest')
 
-        socket.once('windowUpdate', (windowUpdate) => {
-          assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-          assert.strictEqual(windowUpdate.type, 'chest')
+    assert.strictEqual(windowUpdate1.slots[0]?.name, 'dirt')
+    assert.strictEqual(windowUpdate1.slots[0]?.count, 16)
+    assert(windowUpdate1.slots[0]?.texture)
+    assert.strictEqual(windowUpdate1.slots[54], null)
 
-          assert.strictEqual(windowUpdate.slots[0], null)
-          assert.strictEqual(windowUpdate.slots[27]?.name, 'dirt')
-          assert.strictEqual(windowUpdate.slots[27]?.count, 16)
-          assert(windowUpdate.slots[27]?.texture)
+    chest.withdraw(mcData.itemsByName.dirt.id, null, 16) // Moves from slot 0 to slot 27
+    const [windowUpdate2] = await once(socket, 'windowUpdate')
 
-          chest.close()
+    assert.strictEqual(windowUpdate2.id, bot.currentWindow?.id)
+    assert.strictEqual(windowUpdate2.type, 'chest')
 
-          done()
-        })
-        chest.withdraw(mcData.itemsByName.dirt.id, null, 16, noop) // Moves from slot 0 to slot 27
-      })
-      chest.deposit(mcData.itemsByName.dirt.id, null, 16, noop) // Moves from slot 54 to slot 0
-    }, 2500)
+    assert.strictEqual(windowUpdate2.slots[0], null)
+    assert.strictEqual(windowUpdate2.slots[27]?.name, 'dirt')
+    assert.strictEqual(windowUpdate2.slots[27]?.count, 16)
+    assert(windowUpdate2.slots[27]?.texture)
+
+    chest.close()
   })
 
-  it('Double Chest Updates Using deposit and withdraw', function (done) {
+  it('Double Chest Updates Using deposit and withdraw', async function () {
     this.timeout(30 * 1000)
 
     bot.chat('/give test dirt 16\n')
@@ -248,40 +242,37 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
       bot.chat(`/setblock ${container2Pos.toArray().join(' ')} minecraft:chest[facing=west,type=left]\n`)
     }
 
-    setTimeout(async () => {
-      assert.strictEqual(bot.inventory.slots[36]?.name, 'dirt')
-      assert.strictEqual(bot.inventory.slots[36]?.count, 16)
+    await sleep(2500)
 
-      const chest = await bot.openContainer(bot.blockAt(container1Pos))
+    assert.strictEqual(bot.inventory.slots[36]?.name, 'dirt')
+    assert.strictEqual(bot.inventory.slots[36]?.count, 16)
 
-      await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is opened that and that we don't want
+    const chest = await bot.openContainer(bot.blockAt(container1Pos))
+    await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is opened that and that we don't want
 
-      socket.once('windowUpdate', (windowUpdate) => {
-        assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-        assert.strictEqual(windowUpdate.type, 'large-chest')
+    chest.deposit(mcData.itemsByName.dirt.id, null, 16) // Moves from slot 81 to slot 0
+    const [windowUpdate1] = await once(socket, 'windowUpdate')
 
-        assert.strictEqual(windowUpdate.slots[0]?.name, 'dirt')
-        assert.strictEqual(windowUpdate.slots[0]?.count, 16)
-        assert(windowUpdate.slots[0]?.texture)
-        assert.strictEqual(windowUpdate.slots[81], null)
+    assert.strictEqual(windowUpdate1.id, bot.currentWindow?.id)
+    assert.strictEqual(windowUpdate1.type, 'large-chest')
 
-        socket.once('windowUpdate', (windowUpdate) => {
-          assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-          assert.strictEqual(windowUpdate.type, 'large-chest')
+    assert.strictEqual(windowUpdate1.slots[0]?.name, 'dirt')
+    assert.strictEqual(windowUpdate1.slots[0]?.count, 16)
+    assert(windowUpdate1.slots[0]?.texture)
+    assert.strictEqual(windowUpdate1.slots[81], null)
 
-          assert.strictEqual(windowUpdate.slots[0], null)
-          assert.strictEqual(windowUpdate.slots[54]?.name, 'dirt')
-          assert.strictEqual(windowUpdate.slots[54]?.count, 16)
-          assert(windowUpdate.slots[54]?.texture)
+    chest.withdraw(mcData.itemsByName.dirt.id, null, 16) // Moves from slot 0 to slot 54
+    const [windowUpdate2] = await once(socket, 'windowUpdate')
 
-          chest.close()
+    assert.strictEqual(windowUpdate2.id, bot.currentWindow?.id)
+    assert.strictEqual(windowUpdate2.type, 'large-chest')
 
-          done()
-        })
-        chest.withdraw(mcData.itemsByName.dirt.id, null, 16, noop) // Moves from slot 0 to slot 54
-      })
-      chest.deposit(mcData.itemsByName.dirt.id, null, 16, noop) // Moves from slot 81 to slot 0
-    }, 2500)
+    assert.strictEqual(windowUpdate2.slots[0], null)
+    assert.strictEqual(windowUpdate2.slots[54]?.name, 'dirt')
+    assert.strictEqual(windowUpdate2.slots[54]?.count, 16)
+    assert(windowUpdate2.slots[54]?.texture)
+
+    chest.close()
   })
 
   /**
@@ -296,109 +287,108 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
    *
    * All of this while verifiying that it's being updated correctly on the socket
    */
-  it('Furnace Updates Using Furnace\'s functions', function (done) {
+  it('Furnace Updates Using Furnace\'s functions', async function () {
     this.timeout(30 * 1000)
 
     bot.chat('/give test coal 16\n')
     bot.chat('/give test beef 1\n')
     bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:furnace\n`)
 
-    setTimeout(async () => {
-      assert.strictEqual(bot.inventory.slots[36]?.name, 'coal')
-      assert.strictEqual(bot.inventory.slots[36]?.count, 16)
-      assert.strictEqual(bot.inventory.slots[37]?.name, 'beef')
-      assert.strictEqual(bot.inventory.slots[37]?.count, 1)
+    await sleep(2500)
 
-      const furnace = await bot.openFurnace(bot.blockAt(container1Pos))
+    assert.strictEqual(bot.inventory.slots[36]?.name, 'coal')
+    assert.strictEqual(bot.inventory.slots[36]?.count, 16)
+    assert.strictEqual(bot.inventory.slots[37]?.name, 'beef')
+    assert.strictEqual(bot.inventory.slots[37]?.count, 1)
 
-      await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is opened that and that we don't want
+    const furnace = await bot.openFurnace(bot.blockAt(container1Pos))
+    await sleep(2000) // We have to wait a bit so the server sends the inventoryUpdates that are sent when a chest is opened that and that we don't want
 
-      socket.once('windowUpdate', (windowUpdate) => {
-        assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-        assert.strictEqual(windowUpdate.type, 'furnace')
+    furnace.putFuel(mcData.itemsByName.coal.id, null, 16)
+    const [windowUpdate1] = await once(socket, 'windowUpdate')
 
-        assert.strictEqual(windowUpdate.slots[30], null)
+    assert.strictEqual(windowUpdate1.id, bot.currentWindow?.id)
+    assert.strictEqual(windowUpdate1.type, 'furnace')
 
-        socket.once('windowUpdate', (windowUpdate) => {
-          assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-          assert.strictEqual(windowUpdate.type, 'furnace')
+    assert.strictEqual(windowUpdate1.slots[30], null)
 
-          assert.strictEqual(windowUpdate.slots[31], null)
+    furnace.putInput(mcData.itemsByName.beef.id, null, 1)
+    const [windowUpdate2] = await once(socket, 'windowUpdate')
 
-          function furnaceUpdateHandler () {
-            if (furnace.outputItem()) {
-              furnace.removeListener('update', furnaceUpdateHandler)
+    assert.strictEqual(windowUpdate2.id, bot.currentWindow?.id)
+    assert.strictEqual(windowUpdate2.type, 'furnace')
 
-              socket.once('windowUpdate', (windowUpdate) => {
-                assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-                assert.strictEqual(windowUpdate.type, 'furnace')
+    assert.strictEqual(windowUpdate2.slots[31], null)
 
-                assert.strictEqual(windowUpdate.slots[3]?.name, 'cooked_beef')
-                assert.strictEqual(windowUpdate.slots[3]?.count, 1)
-                assert(windowUpdate.slots[3]?.texture)
+    // Wait for the furnace to cook the beef
+    await new Promise(resolve => {
+      function furnaceUpdateHandler () {
+        if (furnace.outputItem()) {
+          furnace.removeListener('update', furnaceUpdateHandler)
+          resolve()
+        }
+      }
+      furnace.on('update', furnaceUpdateHandler)
+    })
 
-                socket.once('windowUpdate', (windowUpdate) => {
-                  assert.strictEqual(windowUpdate.id, bot.currentWindow?.id)
-                  assert.strictEqual(windowUpdate.type, 'furnace')
+    furnace.takeOutput()
+    const [windowUpdate3] = await once(socket, 'windowUpdate')
 
-                  assert.strictEqual(windowUpdate.slots[4]?.name, 'coal')
-                  assert.strictEqual(windowUpdate.slots[4]?.count, 15)
-                  assert(windowUpdate.slots[4]?.texture)
+    assert.strictEqual(windowUpdate3.id, bot.currentWindow?.id)
+    assert.strictEqual(windowUpdate3.type, 'furnace')
 
-                  furnace.close()
+    assert.strictEqual(windowUpdate3.slots[3]?.name, 'cooked_beef')
+    assert.strictEqual(windowUpdate3.slots[3]?.count, 1)
+    assert(windowUpdate3.slots[3]?.texture)
 
-                  done()
-                })
-                furnace.takeFuel(noop)
-              })
-              furnace.takeOutput(noop)
-            }
-          }
-          furnace.on('update', furnaceUpdateHandler)
-        })
-        furnace.putInput(mcData.itemsByName.beef.id, null, 1, noop)
-      })
-      furnace.putFuel(mcData.itemsByName.coal.id, null, 16, noop)
-    }, 2500)
+    furnace.takeFuel()
+    const [windowUpdate4] = await once(socket, 'windowUpdate')
+
+    assert.strictEqual(windowUpdate4.id, bot.currentWindow?.id)
+    assert.strictEqual(windowUpdate4.type, 'furnace')
+
+    assert.strictEqual(windowUpdate4.slots[4]?.name, 'coal')
+    assert.strictEqual(windowUpdate4.slots[4]?.count, 15)
+    assert(windowUpdate4.slots[4]?.texture)
+
+    furnace.close()
   })
 
   // Opens and updates an unsupported window. The bot should receive inventory updates instead of updates from an unknown window
-  it('Unsupported window', function (done) {
+  it('Unsupported window', async function () {
     this.timeout(30 * 1000)
 
     bot.chat('/give test dirt 16\n') // Slot 36
     bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest\n`)
 
-    setTimeout(async () => {
-      assert.strictEqual(bot.inventory.slots[36]?.name, 'dirt')
-      assert.strictEqual(bot.inventory.slots[36]?.count, 16)
+    await sleep(2500)
 
-      // We want getWindowName to return null once to simulate an unknown window
-      setFailStreak([true, false, true])
+    assert.strictEqual(bot.inventory.slots[36]?.name, 'dirt')
+    assert.strictEqual(bot.inventory.slots[36]?.count, 16)
 
-      socket.once('window', (window) => {
-        assert.strictEqual(window.id, 0)
-        assert.strictEqual(window.type, 'inventory')
+    // We want getWindowName to return null once to simulate an unknown window
+    setFailStreak([true, false, true])
 
-        assert.strictEqual(window.slots[36]?.name, 'dirt')
-        assert.strictEqual(window.slots[36]?.count, 16)
-        assert(window.slots[36]?.texture)
+    const chest = await bot.openContainer(bot.blockAt(container1Pos))
+    const [window] = await once(socket, 'window')
 
-        socket.on('windowUpdate', (windowUpdate) => {
-          assert.strictEqual(windowUpdate.id, 0)
-          assert.strictEqual(windowUpdate.type, 'inventory')
+    assert.strictEqual(window.id, 0)
+    assert.strictEqual(window.type, 'inventory')
 
-          assert.strictEqual(windowUpdate.slots[36]?.name, 'dirt')
-          assert.strictEqual(windowUpdate.slots[36]?.count, 16)
-          assert(windowUpdate.slots[36]?.texture)
+    assert.strictEqual(window.slots[36]?.name, 'dirt')
+    assert.strictEqual(window.slots[36]?.count, 16)
+    assert(window.slots[36]?.texture)
 
-          chest.close()
+    const [windowUpdate] = await once(socket, 'windowUpdate')
 
-          done()
-        })
-      })
-      const chest = await bot.openContainer(bot.blockAt(container1Pos))
-    }, 2500)
+    assert.strictEqual(windowUpdate.id, 0)
+    assert.strictEqual(windowUpdate.type, 'inventory')
+
+    assert.strictEqual(windowUpdate.slots[36]?.name, 'dirt')
+    assert.strictEqual(windowUpdate.slots[36]?.count, 16)
+    assert(windowUpdate.slots[36]?.texture)
+
+    chest.close()
   })
 
   // TODO: Check also that the item slot is set correctly (not only the position in the array)
@@ -436,11 +426,3 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
     })
   })
 })
-
-function noop () {}
-
-function sleep (ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms)
-  })
-}

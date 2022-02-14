@@ -132,12 +132,20 @@ module.exports = function (bot, options = {}) {
     }
     bot.inventory.on('updateSlot', (slot, oldItem, newItem) => update(slot, oldItem, newItem, bot.inventory))
 
+    let previousWindow
     const windowOpenHandler = (window) => {
-      emitWindow(window)
-
       const windowUpdateHandler = (slot, oldItem, newItem) => {
         update(slot, oldItem, newItem, window)
       }
+
+      // Remove previous listeners
+      if (previousWindow && previousWindow.id !== bot.inventory.id) {
+        previousWindow.removeListener('updateSlot', windowUpdateHandler)
+      }
+      previousWindow = window
+
+      emitWindow(window)
+
       window.on('updateSlot', windowUpdateHandler)
 
       window.once('close', () => {
