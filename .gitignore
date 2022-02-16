@@ -120,6 +120,8 @@ test/server.jar
 
 versions/
 
+launcher_accounts.json
+
 # For standard to work:
 client/node_modules/
 client/public/build/

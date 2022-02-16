@@ -2,6 +2,8 @@
   import { throttle } from "lodash";
   import { onMount } from "svelte";
 
+  import { receiveWindow, updateWindow } from "./updateWindow";
+
   import SlotList from "./SlotList.svelte";
 
   const drawWindowThrottleTime = 100;
@@ -80,16 +82,11 @@
     const socket = io();
 
     socket.on("window", function (_window) {
-      window = _window;
+      window = receiveWindow(window, _window);
     });
 
     socket.on("windowUpdate", function (_windowUpdate) {
-      // Ignore updates that are not from the current window
-      if (_windowUpdate.id !== window.id) return;
-
-      for (const slot in _windowUpdate.slots) {
-        window.slots[slot] = _windowUpdate.slots[slot];
-      }
+      window = updateWindow(window, _windowUpdate);
     });
 
     // onDestroy
