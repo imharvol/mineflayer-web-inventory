@@ -79,6 +79,10 @@ module.exports = function (bot, options = {}) {
         windowUpdate.type = getWindowName(bot.inventory)
         window.slots = Array(9).fill(null, 0, 9).concat(window.slots.slice(window.inventoryStart, window.inventoryEnd)) // The 9 empty slots that we add are the armor and crafting slots that are not included in inventoryStart and inventoryEnd
         window.slots.forEach(item => { if (item) item.slot -= window.inventoryStart - 9 })
+
+        windowUpdate.unsupported = true
+        windowUpdate.realId = window.id
+        windowUpdate.realType = window.type
       }
 
       const slots = Object.assign({}, window.slots)

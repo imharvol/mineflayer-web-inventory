@@ -36,36 +36,43 @@
       windowImage.src = `windows/${window?.type ?? "inventory"}.png`;
     });
 
-    // Draw items
-    for (const item in window.slots) {
-      if (!window.slots[item]) continue;
-      const inventorySlot =
-        windowsCoordinates[window.type][window.slots[item].slot];
+    // Draw slots
+    for (const slot in window.slots) {
+      if (!window.slots[slot]) continue;
 
-      if (window.slots[item].texture && inventorySlot) {
-        const itemImage = new Image();
-        itemImage.src = window.slots[item].texture;
+      const slotCoordinates =
+        windowsCoordinates[window.type][window.slots[slot].slot];
 
-        itemImage.onload = function () {
-          // Draw item image
+      if (window.slots[slot].texture && slotCoordinates) {
+        const slotImage = new Image();
+        slotImage.src = window.slots[slot].texture;
+
+        slotImage.onload = function () {
+          // Draw slot image
           ctx.imageSmoothingEnabled = false;
-          ctx.drawImage(itemImage, inventorySlot[0], inventorySlot[1], 32, 32);
+          ctx.drawImage(
+            slotImage,
+            slotCoordinates[0],
+            slotCoordinates[1],
+            32,
+            32
+          );
 
-          // Draw item count
-          if (window.slots[item].count > 1) {
+          // Draw slot count
+          if (window.slots[slot].count > 1) {
             ctx.font = "20px monospace";
             ctx.fillStyle = "black";
             ctx.textAlign = "end";
             ctx.fillText(
-              window.slots[item].count,
-              inventorySlot[0] + 33,
-              inventorySlot[1] + 31
+              window.slots[slot].count,
+              slotCoordinates[0] + 33,
+              slotCoordinates[1] + 31
             );
             ctx.fillStyle = "white";
             ctx.fillText(
-              window.slots[item].count,
-              inventorySlot[0] + 32,
-              inventorySlot[1] + 30
+              window.slots[slot].count,
+              slotCoordinates[0] + 32,
+              slotCoordinates[1] + 30
             );
           }
         };
@@ -96,6 +103,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>mineflayer bot's inventory</title>
+</svelte:head>
+
 <main>
   <!-- Canvas -->
   <canvas bind:this={canvas} id="windowCanvas" width="352" height="332">
@@ -121,6 +132,14 @@
   >
     {showItemList ? "Hide Item List" : "Show Item List"}
   </button>
+
+  {#if window}
+    {#if window.unsupported}
+      <p style="color: red;">The current window is not supported but mineflayer-web-inventory will still try to show you inventory updates</p>
+    {/if}
+    <p>Current Window Id: {window.realId ?? window.id}</p>
+    <p>Current Window Type: {window.realType ?? window.type}</p>
+  {/if}
 
   <!-- Lists -->
   {#if showJson && window}

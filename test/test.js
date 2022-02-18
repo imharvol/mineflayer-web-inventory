@@ -9,7 +9,6 @@ const inventoryViewer = require('../')
 const vec3 = require('vec3')
 const open = require('open')
 const { setFailStreak } = require('../utils')
-const { once } = require('events')
 const { receiveWindow, updateWindow } = require('../client/src/updateWindow')
 
 const serverProperties = {
@@ -22,7 +21,7 @@ const serverProperties = {
   'generate-structures': 'false'
 }
 
-const minecraftVersion = '1.17'
+const minecraftVersion = '1.18'
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -135,6 +134,7 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
     window = null
 
     // Setup a clean enviroment
+    bot.chat(`/setblock ${botPos.floored().offset(0, -1, 0).toArray().join(' ')} minecraft:dirt\n`)
     bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:air\n`)
     bot.chat(`/setblock ${container2Pos.toArray().join(' ')} minecraft:air\n`)
     bot.chat('/kill @e[type=item]\n')
@@ -459,28 +459,47 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
   it('Unsupported window', async function () {
     this.timeout(30 * 1000)
 
-    bot.chat('/give test dirt 16\n') // Slot 36
     bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest\n`)
 
-    await sleep(2500)
-
-    assertSlot(bot.inventory.slots[36], 'dirt', 16, false)
+    // Correct slots before opening the "unknown window"
+    bot.chat('/give test dirt 16\n')
+    await sleep(2000)
+    assertWindow(window, 0, 'inventory')
+    assert.equal(window.unsupported, undefined)
+    assert.equal(window.realId, undefined)
+    assert.equal(window.realType, undefined)
+    assertSlotMatch(bot.inventory, window, 36, 'dirt', 16)
 
     // We want getWindowName to return null once to simulate an unknown window
     setFailStreak([true, false, true])
 
+    // Open the "unknown window" and check that the items are shown in the correct slots of the inventory
     const chest = await bot.openContainer(bot.blockAt(container1Pos))
-    const [window] = await once(socket, 'window')
-
+    await sleep(2000)
     assertWindow(window, 0, 'inventory')
+    assert(window.unsupported)
+    assert.strictEqual(window.realId, bot.currentWindow.id)
+    assert.strictEqual(window.realType, bot.currentWindow.type)
     assertSlot(window.slots[36], 'dirt', 16)
 
-    const [windowUpdate] = await once(socket, 'windowUpdate')
-
+    // Correct slots after receiving items while the "unknown window" is open
+    bot.chat('/give test beef 1\n')
+    await sleep(2000)
     assertWindow(window, 0, 'inventory')
-    assertSlot(windowUpdate.slots[36], 'dirt', 16)
+    assert(window.unsupported)
+    assert.strictEqual(window.realId, bot.currentWindow.id)
+    assert.strictEqual(window.realType, bot.currentWindow.type)
+    assertSlot(window.slots[37], 'beef', 1)
 
+    // Correct slots after closing the "unknown window"
     chest.close()
+    await sleep(2000)
+    assertWindow(window, 0, 'inventory')
+    assert.equal(window.unsupported, undefined)
+    assert.equal(window.realId, undefined)
+    assert.equal(window.realType, undefined)
+    assertSlotMatch(bot.inventory, window, 36, 'dirt', 16)
+    assertSlotMatch(bot.inventory, window, 37, 'beef', 1)
   })
 
   // TODO: Check also that the item slot is set correctly (not only the position in the array)
