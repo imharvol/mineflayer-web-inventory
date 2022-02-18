@@ -22,7 +22,7 @@ const serverProperties = {
   'generate-structures': 'false'
 }
 
-const minecraftVersion = '1.16'
+const minecraftVersion = '1.17'
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -59,7 +59,7 @@ const assertSlot = (actualSlot, expectedSlotName, expectedSlotCount, assertTextu
  * @param {Boolean|Number} expectedSlotCount
  */
 const assertSlotMatch = (mineflayerWindow, webWindow, slotNumber, expectedSlotName, expectedSlotCount) => {
-  if (slotNumber) { assertSlot(mineflayerWindow.slots[slotNumber], expectedSlotName, expectedSlotCount, false) }
+  assertSlot(mineflayerWindow.slots[slotNumber], expectedSlotName, expectedSlotCount, false)
   assertSlot(webWindow.slots[slotNumber], expectedSlotName, expectedSlotCount, true)
 }
 
@@ -273,6 +273,13 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
     assertSlotMatch(bot.currentWindow, window, 56, 'dirt', 16)
 
     chest.close()
+    await sleep(2000)
+
+    // Check that after closing the chest, the window changes to an inventory
+    // but stays updated with the pumpkings that were received while the chest was open
+    assertWindow(window, 0, 'inventory')
+    assertSlotMatch(bot.inventory, window, 36, 'pumpkin', 32)
+    assertSlotMatch(bot.inventory, window, 38, 'dirt', 16)
   })
 
   it('Chest updates using deposit and withdraw', async function () {
