@@ -5,6 +5,8 @@ const main = async () => {
   const outputFilePath = path.join(__dirname, '..', 'public', 'windows', 'coordinates.json')
 
   const windowSlotsCoords = {
+    slotSize: 32,
+    slotSeparation: 36,
     inventory: {},
     chest: {},
     'large-chest': {},
@@ -14,27 +16,27 @@ const main = async () => {
 
   windowSlotsCoords.inventory = {
     // Crafting slots
-    0: [307, 55],
-    1: [195, 35],
-    2: [231, 35],
-    3: [195, 71],
-    4: [231, 71],
+    0: [308, 56],
+    1: [196, 36],
+    2: [232, 36],
+    3: [196, 72],
+    4: [232, 72],
 
-    5: [15, 15], // Helmet
-    9: [15, 167], // Inventory
-    18: [15, 203], // Inventory
-    27: [15, 239], // Inventory
-    36: [15, 283], // Tool bar
-    45: [153, 123] // Left hand
+    5: [16, 16], // Helmet
+    9: [16, 168], // Inventory
+    18: [16, 204], // Inventory
+    27: [16, 240], // Inventory
+    36: [16, 284], // Tool bar
+    45: [154, 124] // Left hand
   }
   // Add armor slots (5 - 8)
   for (let i = 5 + 1; i <= 8; i++) {
-    windowSlotsCoords.inventory[i] = [windowSlotsCoords.inventory[i - 1][0], windowSlotsCoords.inventory[i - 1][1] + 36]
+    windowSlotsCoords.inventory[i] = [windowSlotsCoords.inventory[i - 1][0], windowSlotsCoords.inventory[i - 1][1] + windowSlotsCoords.slotSeparation]
   }
   // Add inventory and tool bar slots
   for (let i = 9; i < 5 * 9; i += 9) {
     for (let j = 1; j <= 8; j++) {
-      windowSlotsCoords.inventory[i + j] = [windowSlotsCoords.inventory[i][0] + 36 * j, windowSlotsCoords.inventory[i][1]]
+      windowSlotsCoords.inventory[i + j] = [windowSlotsCoords.inventory[i][0] + windowSlotsCoords.slotSeparation * j, windowSlotsCoords.inventory[i][1]]
     }
   }
 
@@ -52,7 +54,7 @@ const main = async () => {
   }
   for (let i = 0; i < 7 * 9; i += 9) {
     for (let j = 1; j <= 8; j++) {
-      windowSlotsCoords.chest[i + j] = [windowSlotsCoords.chest[i][0] + 36 * j, windowSlotsCoords.chest[i][1]]
+      windowSlotsCoords.chest[i + j] = [windowSlotsCoords.chest[i][0] + windowSlotsCoords.slotSeparation * j, windowSlotsCoords.chest[i][1]]
     }
   }
 
@@ -73,7 +75,7 @@ const main = async () => {
   }
   for (let i = 0; i < 10 * 9; i += 9) {
     for (let j = 1; j <= 8; j++) {
-      windowSlotsCoords['large-chest'][i + j] = [windowSlotsCoords['large-chest'][i][0] + 36 * j, windowSlotsCoords['large-chest'][i][1]]
+      windowSlotsCoords['large-chest'][i + j] = [windowSlotsCoords['large-chest'][i][0] + windowSlotsCoords.slotSeparation * j, windowSlotsCoords['large-chest'][i][1]]
     }
   }
 
@@ -92,13 +94,13 @@ const main = async () => {
   // Add input slots (1-9)
   for (let i = 1; i < 3 * 3; i += 3) {
     for (let j = 1; j <= 2; j++) {
-      windowSlotsCoords['crafting-table'][i + j] = [windowSlotsCoords['crafting-table'][i][0] + 36 * j, windowSlotsCoords['crafting-table'][i][1]]
+      windowSlotsCoords['crafting-table'][i + j] = [windowSlotsCoords['crafting-table'][i][0] + windowSlotsCoords.slotSeparation * j, windowSlotsCoords['crafting-table'][i][1]]
     }
   }
   // Add inventory slots (10-45)
   for (let i = 10; i < 5 * 9; i += 9) {
     for (let j = 1; j <= 8; j++) {
-      windowSlotsCoords['crafting-table'][i + j] = [windowSlotsCoords['crafting-table'][i][0] + 36 * j, windowSlotsCoords['crafting-table'][i][1]]
+      windowSlotsCoords['crafting-table'][i + j] = [windowSlotsCoords['crafting-table'][i][0] + windowSlotsCoords.slotSeparation * j, windowSlotsCoords['crafting-table'][i][1]]
     }
   }
 
@@ -116,7 +118,7 @@ const main = async () => {
   // Add inventory slots (3-38)
   for (let i = 3; i < 4 * 9; i += 9) {
     for (let j = 1; j <= 8; j++) {
-      windowSlotsCoords.furnace[i + j] = [windowSlotsCoords.furnace[i][0] + 36 * j, windowSlotsCoords.furnace[i][1]]
+      windowSlotsCoords.furnace[i + j] = [windowSlotsCoords.furnace[i][0] + windowSlotsCoords.slotSeparation * j, windowSlotsCoords.furnace[i][1]]
     }
   }
 

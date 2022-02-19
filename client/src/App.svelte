@@ -15,70 +15,177 @@
 
   let windowsCoordinates;
 
+  $: ctx = canvas?.getContext("2d");
+
   // Draw window reactively when `window` changes
-  $: drawWindow(window);
+  $: {
+    window;
 
-  const drawWindow = throttle(async (window) => {
-    if (!window) return;
+    drawWindow();
+  }
 
-    const ctx = canvas.getContext("2d");
+  // Update hovered slot
+  $: {
+    currentSlot;
+    if (currentSlot !== oldSlot) {
+      if (oldSlot) {
+        fillSlotBackground(oldSlot, "#8b8b8b");
+        drawSlotItem(window.slots[oldSlot]);
+      }
+
+      if (currentSlot) {
+        fillSlotBackground(currentSlot, "#c5c5c5");
+        drawSlotItem(window.slots[currentSlot]).then(() => {
+          drawSlotNumber(currentSlot);
+        });
+      }
+
+      oldSlot = currentSlot;
+    }
+  }
+
+  const drawImage = (
+    imageSrc,
+    coordinates,
+    resizeX,
+    resizeY,
+    resizeCanvas = false
+  ) => {
+    return new Promise((resolve) => {
+      const image = new Image();
+      image.addEventListener("load", function () {
+        if (resizeCanvas) {
+          canvas.width = image.width;
+          canvas.height = image.height;
+        }
+        if (resizeX && resizeY) {
+          ctx.drawImage(
+            image,
+            coordinates[0],
+            coordinates[1],
+            resizeX,
+            resizeY
+          );
+        } else {
+          ctx.drawImage(image, coordinates[0], coordinates[1]);
+        }
+        resolve(image);
+      });
+      image.src = imageSrc;
+    });
+  };
+
+  const fillSlotBackground = (slotNumber, color) => {
+    const slotCoordinates = windowsCoordinates[window.type][slotNumber];
+    if (!slotCoordinates) return;
+
+    ctx.fillStyle = color;
+    ctx.fillRect(
+      slotCoordinates[0],
+      slotCoordinates[1],
+      windowsCoordinates.slotSize,
+      windowsCoordinates.slotSize
+    );
+  };
+
+  const drawSlotNumber = (slotNumber) => {
+    const slotCoordinates = windowsCoordinates[window.type][slotNumber];
+
+    ctx.font = "10px monospace";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "start";
+    ctx.fillText(slotNumber, slotCoordinates[0] + 1, slotCoordinates[1] + 10);
+    ctx.fillStyle = "black";
+    ctx.fillText(slotNumber, slotCoordinates[0] + 1, slotCoordinates[1] + 10);
+  };
+
+  const drawSlotItem = async (slot) => {
+    if (!slot) return;
+
+    const slotCoordinates = windowsCoordinates[window.type][slot.slot];
+    if (!slotCoordinates || !slot.texture) return;
+
+    ctx.imageSmoothingEnabled = false;
+    await drawImage(
+      slot.texture,
+      slotCoordinates,
+      windowsCoordinates.slotSize,
+      windowsCoordinates.slotSize,
+      false
+    );
+
+    // Draw slot count
+    if (slot.count > 1) {
+      ctx.font = "20px monospace";
+      ctx.fillStyle = "black";
+      ctx.textAlign = "end";
+      ctx.fillText(
+        slot.count,
+        slotCoordinates[0] + 33,
+        slotCoordinates[1] + 31
+      );
+      ctx.fillStyle = "white";
+      ctx.fillText(
+        slot.count,
+        slotCoordinates[0] + 32,
+        slotCoordinates[1] + 30
+      );
+    }
+  };
+
+  const _drawWindow = async () => {
+    if (!window || !canvas) return;
 
     // Draw background
-    await new Promise((resolve) => {
-      const windowImage = new Image();
-      windowImage.addEventListener("load", function () {
-        canvas.width = windowImage.width;
-        canvas.height = windowImage.height;
-        ctx.drawImage(windowImage, 0, 0);
+    await drawImage(
+      `windows/${window?.type ?? "inventory"}.png`,
+      [0, 0],
+      null,
+      null,
+      true // Resize canvas to the image's size
+    );
 
-        resolve();
-      });
-      windowImage.src = `windows/${window?.type ?? "inventory"}.png`;
-    });
+    // Draw hovered slot
+    if (currentSlot) fillSlotBackground(currentSlot, "#c5c5c5");
 
     // Draw slots
     for (const slot in window.slots) {
-      if (!window.slots[slot]) continue;
-
-      const slotCoordinates =
-        windowsCoordinates[window.type][window.slots[slot].slot];
-
-      if (window.slots[slot].texture && slotCoordinates) {
-        const slotImage = new Image();
-        slotImage.src = window.slots[slot].texture;
-
-        slotImage.onload = function () {
-          // Draw slot image
-          ctx.imageSmoothingEnabled = false;
-          ctx.drawImage(
-            slotImage,
-            slotCoordinates[0],
-            slotCoordinates[1],
-            32,
-            32
-          );
-
-          // Draw slot count
-          if (window.slots[slot].count > 1) {
-            ctx.font = "20px monospace";
-            ctx.fillStyle = "black";
-            ctx.textAlign = "end";
-            ctx.fillText(
-              window.slots[slot].count,
-              slotCoordinates[0] + 33,
-              slotCoordinates[1] + 31
-            );
-            ctx.fillStyle = "white";
-            ctx.fillText(
-              window.slots[slot].count,
-              slotCoordinates[0] + 32,
-              slotCoordinates[1] + 30
-            );
-          }
-        };
-      }
+      if (window.slots[slot]) drawSlotItem(window.slots[slot]);
     }
-  }, drawWindowThrottleTime);
+
+    // Draw hovered slot number
+    if (currentSlot) drawSlotNumber(currentSlot);
+  };
+  const drawWindow = throttle(_drawWindow, drawWindowThrottleTime);
+
+  // Drag and drop functionality
+  let initialSlot;
+  let finalSlot;
+  let currentSlot;
+  let oldSlot;
+
+  const getCursorCoordinates = (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    return [x, y];
+  };
+
+  const getCursorSlot = (event) => {
+    const cursorCoordinates = getCursorCoordinates(event);
+
+    const slotIndex = Object.values(windowsCoordinates[window.type]).findIndex(
+      (slotCoordinates) =>
+        cursorCoordinates[0] > slotCoordinates[0] &&
+        cursorCoordinates[0] <=
+          slotCoordinates[0] + windowsCoordinates.slotSize &&
+        cursorCoordinates[1] > slotCoordinates[1] &&
+        cursorCoordinates[1] <= slotCoordinates[1] + windowsCoordinates.slotSize
+    );
+
+    if (slotIndex === -1) return null;
+    return Object.keys(windowsCoordinates[window.type])[slotIndex];
+  };
 
   onMount(async () => {
     // Fetch Windows Coordinates
@@ -94,6 +201,32 @@
 
     socket.on("windowUpdate", function (_windowUpdate) {
       window = updateWindow(window, _windowUpdate);
+    });
+
+    canvas.addEventListener("pointerdown", (event) => {
+      initialSlot = getCursorSlot(event);
+    });
+
+    canvas.addEventListener("pointerup", (event) => {
+      finalSlot = getCursorSlot(event);
+
+      console.log(`Drag and drop from ${initialSlot} to ${finalSlot}`);
+
+      initialSlot = null;
+      finalSlot = null;
+    });
+
+    canvas.addEventListener("pointerleave", () => {
+      initialSlot = null;
+      finalSlot = null;
+      currentSlot = null;
+
+      drawWindow();
+    });
+
+    canvas.addEventListener("pointermove", (event) => {
+      const _currentSlot = getCursorSlot(event);
+      if (_currentSlot !== currentSlot) currentSlot = _currentSlot;
     });
 
     // onDestroy
@@ -135,7 +268,10 @@
 
   {#if window}
     {#if window.unsupported}
-      <p style="color: red;">The current window is not supported but mineflayer-web-inventory will still try to show you inventory updates</p>
+      <p style="color: red;">
+        The current window is not supported but mineflayer-web-inventory will
+        still try to show you inventory updates
+      </p>
     {/if}
     <p>Current Window Id: {window.realId ?? window.id}</p>
     <p>Current Window Type: {window.realType ?? window.type}</p>
