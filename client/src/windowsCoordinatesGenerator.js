@@ -1,9 +1,4 @@
-const path = require('path')
-const fsPromises = require('fs/promises')
-
-const main = async () => {
-  const outputFilePath = path.join(__dirname, '..', 'public', 'windows', 'coordinates.json')
-
+export default async () => {
   const windowSlotsCoords = {
     slotSize: 32,
     slotSeparation: 36,
@@ -122,6 +117,5 @@ const main = async () => {
     }
   }
 
-  await fsPromises.writeFile(outputFilePath, JSON.stringify(windowSlotsCoords, null, 2))
+  return windowSlotsCoords
 }
-main()

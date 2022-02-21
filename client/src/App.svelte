@@ -3,6 +3,8 @@
   import { onMount } from "svelte";
 
   import { receiveWindow, updateWindow } from "./updateWindow";
+  import * as canvasUtils from "./canvasUtils";
+  import windowsCoordinatesGenerator from "./windowsCoordinatesGenerator";
 
   import SlotList from "./SlotList.svelte";
 
@@ -13,7 +15,7 @@
   let showJson = false;
   let showItemList = true;
 
-  let windowsCoordinates;
+  let windowsCoordinates = windowsCoordinatesGenerator();
 
   $: ctx = canvas?.getContext("2d");
 
@@ -29,115 +31,29 @@
     currentSlot;
     if (currentSlot !== oldSlot) {
       if (oldSlot) {
-        fillSlotBackground(oldSlot, "#8b8b8b");
-        drawSlotItem(window.slots[oldSlot]);
+        canvasUtils.fillSlotBackground(canvas, oldSlot, "#8b8b8b");
+        canvasUtils.drawSlotItem(canvas, window.slots[oldSlot], initialSlot);
       }
 
       if (currentSlot) {
-        fillSlotBackground(currentSlot, "#c5c5c5");
-        drawSlotItem(window.slots[currentSlot]).then(() => {
-          drawSlotNumber(currentSlot);
-        });
+        canvasUtils.fillSlotBackground(canvas, currentSlot, "#c5c5c5");
+        canvasUtils
+          .drawSlotItem(canvas, window.slots[currentSlot], initialSlot)
+          .then(() => {
+            canvasUtils.drawSlotNumber(canvas, currentSlot);
+          });
       }
 
       oldSlot = currentSlot;
     }
   }
 
-  const drawImage = (
-    imageSrc,
-    coordinates,
-    resizeX,
-    resizeY,
-    resizeCanvas = false
-  ) => {
-    return new Promise((resolve) => {
-      const image = new Image();
-      image.addEventListener("load", function () {
-        if (resizeCanvas) {
-          canvas.width = image.width;
-          canvas.height = image.height;
-        }
-        if (resizeX && resizeY) {
-          ctx.drawImage(
-            image,
-            coordinates[0],
-            coordinates[1],
-            resizeX,
-            resizeY
-          );
-        } else {
-          ctx.drawImage(image, coordinates[0], coordinates[1]);
-        }
-        resolve(image);
-      });
-      image.src = imageSrc;
-    });
-  };
-
-  const fillSlotBackground = (slotNumber, color) => {
-    const slotCoordinates = windowsCoordinates[window.type][slotNumber];
-    if (!slotCoordinates) return;
-
-    ctx.fillStyle = color;
-    ctx.fillRect(
-      slotCoordinates[0],
-      slotCoordinates[1],
-      windowsCoordinates.slotSize,
-      windowsCoordinates.slotSize
-    );
-  };
-
-  const drawSlotNumber = (slotNumber) => {
-    const slotCoordinates = windowsCoordinates[window.type][slotNumber];
-
-    ctx.font = "10px monospace";
-    ctx.fillStyle = "white";
-    ctx.textAlign = "start";
-    ctx.fillText(slotNumber, slotCoordinates[0] + 1, slotCoordinates[1] + 10);
-    ctx.fillStyle = "black";
-    ctx.fillText(slotNumber, slotCoordinates[0] + 1, slotCoordinates[1] + 10);
-  };
-
-  const drawSlotItem = async (slot) => {
-    if (!slot) return;
-
-    const slotCoordinates = windowsCoordinates[window.type][slot.slot];
-    if (!slotCoordinates || !slot.texture) return;
-
-    ctx.imageSmoothingEnabled = false;
-    await drawImage(
-      slot.texture,
-      slotCoordinates,
-      windowsCoordinates.slotSize,
-      windowsCoordinates.slotSize,
-      false
-    );
-
-    // Draw slot count
-    if (slot.count > 1) {
-      ctx.font = "20px monospace";
-      ctx.fillStyle = "black";
-      ctx.textAlign = "end";
-      ctx.fillText(
-        slot.count,
-        slotCoordinates[0] + 33,
-        slotCoordinates[1] + 31
-      );
-      ctx.fillStyle = "white";
-      ctx.fillText(
-        slot.count,
-        slotCoordinates[0] + 32,
-        slotCoordinates[1] + 30
-      );
-    }
-  };
-
   const _drawWindow = async () => {
     if (!window || !canvas) return;
 
     // Draw background
-    await drawImage(
+    await canvasUtils.drawImage(
+      canvas,
       `windows/${window?.type ?? "inventory"}.png`,
       [0, 0],
       null,
@@ -146,23 +62,26 @@
     );
 
     // Draw hovered slot
-    if (currentSlot) fillSlotBackground(currentSlot, "#c5c5c5");
+    if (currentSlot)
+      canvasUtils.fillSlotBackground(canvas, currentSlot, "#c5c5c5");
 
     // Draw slots
     for (const slot in window.slots) {
-      if (window.slots[slot]) drawSlotItem(window.slots[slot]);
+      if (window.slots[slot])
+        await canvasUtils.drawSlotItem(canvas, window.slots[slot], initialSlot);
     }
 
     // Draw hovered slot number
-    if (currentSlot) drawSlotNumber(currentSlot);
+    if (currentSlot) canvasUtils.drawSlotNumber(canvas, currentSlot);
   };
   const drawWindow = throttle(_drawWindow, drawWindowThrottleTime);
 
-  // Drag and drop functionality
-  let initialSlot;
-  let finalSlot;
+  // Hovering functionality
   let currentSlot;
   let oldSlot;
+
+  // Drag and drop functionality
+  let initialSlot;
 
   const getCursorCoordinates = (event) => {
     const rect = canvas.getBoundingClientRect();
@@ -184,7 +103,11 @@
     );
 
     if (slotIndex === -1) return null;
-    return Object.keys(windowsCoordinates[window.type])[slotIndex];
+    return Number(Object.keys(windowsCoordinates[window.type])[slotIndex]);
+  };
+
+  const dragAndDrop = (fromSlotNumber, toSlotNumber) => {
+    console.log(`Drag and drop from ${fromSlotNumber} to ${toSlotNumber}`);
   };
 
   onMount(async () => {
@@ -205,20 +128,18 @@
 
     canvas.addEventListener("pointerdown", (event) => {
       initialSlot = getCursorSlot(event);
+      if (initialSlot) drawWindow();
     });
 
     canvas.addEventListener("pointerup", (event) => {
-      finalSlot = getCursorSlot(event);
-
-      console.log(`Drag and drop from ${initialSlot} to ${finalSlot}`);
-
+      const finalSlot = getCursorSlot(event);
+      if (initialSlot && finalSlot) dragAndDrop(initialSlot, finalSlot);
+      if (initialSlot) drawWindow();
       initialSlot = null;
-      finalSlot = null;
     });
 
     canvas.addEventListener("pointerleave", () => {
       initialSlot = null;
-      finalSlot = null;
       currentSlot = null;
 
       drawWindow();
@@ -226,7 +147,12 @@
 
     canvas.addEventListener("pointermove", (event) => {
       const _currentSlot = getCursorSlot(event);
-      if (_currentSlot !== currentSlot) currentSlot = _currentSlot;
+      if (_currentSlot !== currentSlot) {
+        currentSlot = _currentSlot;
+
+        // If a drag and drop is happening, re-draw the window
+        if (initialSlot) drawWindow();
+      }
     });
 
     // onDestroy

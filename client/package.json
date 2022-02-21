@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "generateWindowsCoordinates": "node scripts/generateWindowsCoordinates.js",
-    "build": "rollup -c && npm run generateWindowsCoordinates",
+    "build": "rollup -c",
     "dev": "rollup -c -w",
     "start": "sirv public --no-clear"
   },
