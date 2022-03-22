@@ -6,7 +6,8 @@ A simple web-based inventory viewer for [mineflayer](https://github.com/Prismari
 
 [![npm version](https://badge.fury.io/js/mineflayer-web-inventory.svg)](https://badge.fury.io/js/mineflayer-web-inventory)
 
-Note that from version 1.3.0 mineflayer-web-inventory will only support mineflayer 3.X.X versions
+Minimum recommended mineflayer version: 4.2.0 
+Note that from version 1.3.0 mineflayer-web-inventory will only support mineflayer 3.X.X and 4.X.X versions
 If you still wish to use mineflayer-web-inventory with mineflayer 2.X.X you can install mineflayer-web-inventory@1.2.1: `npm i mineflayer-web-inventory@1.2.1`
 
 ## Usage
