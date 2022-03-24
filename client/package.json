@@ -1,10 +1,10 @@
 {
-  "name": "svelte-app",
+  "name": "mineflayer-web-inventory-frontend",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "generateWindowsCoordinates": "node scripts/generateWindowsCoordinates.js",
-    "build": "rollup -c && npm run generateWindowsCoordinates",
+    "install": "rollup -c && npm run generateWindowsCoordinates",
     "dev": "rollup -c -w",
     "start": "sirv public --no-clear"
   },
