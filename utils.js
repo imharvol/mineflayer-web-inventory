@@ -35,32 +35,40 @@ function getWindowName (window) {
 }
 
 const metadataToColor = {
-  wool: {
-    0: 'white',
-    1: 'orange',
-    2: 'magenta',
-    3: 'light_blue',
-    4: 'yellow',
-    5: 'lime',
-    6: 'pink',
-    7: 'gray',
-    8: 'silver',
-    9: 'cyan',
-    10: 'purple',
-    11: 'blue',
-    12: 'brown',
-    13: 'green',
-    14: 'red',
-    15: 'black'
-  }
+  0: 'white',
+  1: 'orange',
+  2: 'magenta',
+  3: 'light_blue',
+  4: 'yellow',
+  5: 'lime',
+  6: 'pink',
+  7: 'gray',
+  8: 'silver',
+  9: 'cyan',
+  10: 'purple',
+  11: 'blue',
+  12: 'brown',
+  13: 'green',
+  14: 'red',
+  15: 'black'
 }
+
+const coloredItemPaths = {
+  wool: 'wool_colored_',
+  concrete: 'concrete_',
+  concrete_powder: 'concrete_powder_',
+  stained_glass: 'glass_',
+  stained_glass_pane: 'glass_pane_top_'
+}
+
+// planks and sand
 
 function addTexture (mcData, mcAssets, item) {
   if (!item) return item
 
-  if (mcData.version['<=']('1.12.2') && item.name === 'wool') {
-    const woolColor = metadataToColor.wool[item.metadata]
-    const textureBase64 = fs.readFileSync(path.join(mcAssets.directory, 'blocks', 'wool_colored_' + woolColor + '.png')).toString('base64')
+  if (mcData.version['<=']('1.12.2') && coloredItemPaths[item.name]) {
+    const color = metadataToColor[item.metadata]
+    const textureBase64 = fs.readFileSync(path.join(mcAssets.directory, 'blocks', coloredItemPaths[item.name] + color + '.png')).toString('base64')
     item.texture = 'data:image/png;base64,' + textureBase64
   } else {
     item.texture = mcAssets.textureContent[item.name].texture
