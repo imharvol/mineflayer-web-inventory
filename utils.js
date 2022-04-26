@@ -41,33 +41,41 @@ function getWindowName (window) {
 function addTexture (mcData, mcAssets, item) {
   if (!item) return item
 
-  const blockModels = JSON.parse(fs.readFileSync(path.join(mcAssets.directory, 'blocks_models.json')))
+  try {
+    const blockModels = JSON.parse(fs.readFileSync(path.join(mcAssets.directory, 'blocks_models.json')))
 
-  if (mcData.version['<=']('1.12.2')) {
-    // Fixes the name
-    const itemVariations = mcData.itemsByName[item.name]?.variations ?? mcData.blocksByName[item.name]?.variations
-    if (itemVariations) { item.displayName = itemVariations.find(variation => variation.metadata === item.metadata).displayName }
+    if (mcData.version['<=']('1.12.2')) {
+      // Fixes the name
+      const itemVariations = mcData.itemsByName[item.name]?.variations ?? mcData.blocksByName[item.name]?.variations
+      if (itemVariations) { item.displayName = itemVariations.find(variation => variation.metadata === item.metadata).displayName }
 
-    // Tries to fix the texture
-    let minecraftName =
-      rawMcData.legacy.pc.items[item.type + ':' + item.metadata].substr('minecraft:'.length)
-    if (minecraftName.includes('[')) minecraftName = minecraftName.substr(0, minecraftName.indexOf['['] - 1)
+      // Tries to fix the texture
+      let minecraftName =
+      rawMcData.legacy.pc.items[item.type + ':' + item.metadata]?.substr('minecraft:'.length)
 
-    if (blockModels[minecraftName]) {
-      const assetName = Object.values(blockModels[minecraftName].textures)[0]
+      if (minecraftName) {
+        if (minecraftName.includes('[')) minecraftName = minecraftName.substr(0, minecraftName.indexOf['['] - 1)
 
-      try {
-        const textureBase64 = fs
-          .readFileSync(path.join(mcAssets.directory, assetName + '.png'))
-          .toString('base64')
-        item.texture = 'data:image/png;base64,' + textureBase64
-      } catch (err) {
-        // It wasn't found. This happens with pistons for example
+        if (blockModels[minecraftName]) {
+          const assetName = Object.values(blockModels[minecraftName].textures)[0]
+
+          try {
+            const textureBase64 = fs
+              .readFileSync(path.join(mcAssets.directory, assetName + '.png'))
+              .toString('base64')
+            item.texture = 'data:image/png;base64,' + textureBase64
+          } catch (err) {
+            // It wasn't found. This happens with pistons for example
+          }
+        }
       }
     }
+  } catch (err) {
+    console.log('mineflayer-web-inventory error. trying to continue')
+    console.log(err)
+  } finally {
+    if (!item.texture) item.texture = mcAssets.textureContent[item.name].texture
   }
-
-  if (!item.texture) item.texture = mcAssets.textureContent[item.name].texture
 
   return item
 }
