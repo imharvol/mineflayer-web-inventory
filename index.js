@@ -1,4 +1,4 @@
-const { getWindowName, addTexture } = require('./utils')
+const { getWindowName, addItemData } = require('./utils')
 
 const DEFAULT_VERSION = '1.16'
 
@@ -93,7 +93,7 @@ module.exports = function (bot, options = {}) {
 
       const slots = Object.assign({}, window.slots)
       for (const item in slots) {
-        if (slots[item]) slots[item] = addTexture(mcData, mcAssets, slots[item])
+        if (slots[item]) slots[item] = addItemData(mcData, mcAssets, slots[item])
       }
       windowUpdate.slots = slots
       socket.emit('window', windowUpdate)
@@ -134,7 +134,10 @@ module.exports = function (bot, options = {}) {
         }
       }
 
-      if (newItem) newItem = addTexture(mcData, mcAssets, newItem)
+      if (newItem) {
+        newItem.durabilityUsed = window.slots[slot]?.durabilityUsed
+        newItem = addItemData(mcData, mcAssets, newItem)
+      }
 
       updateObject.slots[slot] = newItem
 

@@ -75,6 +75,25 @@
               slotCoordinates[1] + 30
             );
           }
+
+          // Draw slot durability (if any)
+          if (window.slots[slot].durabilityLeft != null) {
+            ctx.fillStyle = 'black';
+            ctx.fillRect(
+              slotCoordinates[0]+3, 
+              slotCoordinates[1]+29, 
+              28, 
+              3
+            );
+
+            ctx.fillStyle = `hsl(${Math.round(window.slots[slot].durabilityLeft*120)}, 100%, 50%)`;
+            ctx.fillRect(
+              slotCoordinates[0]+3, 
+              slotCoordinates[1]+29, 
+              Math.round(window.slots[slot].durabilityLeft*28), 
+              2
+            );
+          }
         };
       }
     }

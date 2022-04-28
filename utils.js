@@ -38,7 +38,7 @@ function getWindowName (window) {
   ]
 }
 
-function addTexture (mcData, mcAssets, item) {
+function addItemData (mcData, mcAssets, item) {
   if (!item) return item
 
   try {
@@ -77,7 +77,13 @@ function addTexture (mcData, mcAssets, item) {
     if (!item.texture) item.texture = mcAssets.textureContent[item.name].texture
   }
 
+  // Add durability left
+  let itemMaxDurability
+  if ((itemMaxDurability = mcData.itemsByName[item.name].maxDurability) && item.durabilityUsed != null) {
+    item.durabilityLeft = (itemMaxDurability - item.durabilityUsed) / itemMaxDurability
+  }
+
   return item
 }
 
-module.exports = { getWindowName, setFailStreak, addTexture }
+module.exports = { getWindowName, setFailStreak, addItemData }

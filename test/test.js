@@ -484,6 +484,20 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
     }
   })
 
+  it('Tool durability', async function () {
+    this.timeout(30 * 1000)
+
+    const damage = 15
+    if (mcData.version['<=']('1.12.2')) {
+      bot.chat('/give test minecraft:golden_pickaxe 1 15\n')
+    } else {
+      bot.chat(`/give test minecraft:golden_pickaxe{Damage:${damage}} 1\n`)
+    }
+    await sleep(2000)
+    assertWindow(window, 0, 'inventory')
+    assert.strictEqual(window.slots[36].durabilityLeft, (32 - damage) / 32)
+  })
+
   // TODO: Find another way to test unsupported windows. Using setFailStreak is really unstable
   // Opens and updates an unsupported window. The bot should receive inventory updates instead of updates from an unknown window
   // it('Unsupported window', async function () {
