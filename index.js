@@ -112,6 +112,7 @@ module.exports = function (bot, options = {}) {
     }, bot.webInventory.options.windowUpdateDebounceTime)
 
     function update (slot, oldItem, newItem, window) {
+      const originalSlot = slot
       // Use copies of oldItem and newItem to avoid modifying the internal state of mineflayer
       if (oldItem) oldItem = Object.assign({}, oldItem)
       if (newItem) newItem = Object.assign({}, newItem)
@@ -135,7 +136,7 @@ module.exports = function (bot, options = {}) {
       }
 
       if (newItem) {
-        newItem.durabilityUsed = window.slots[slot]?.durabilityUsed
+        newItem.durabilityUsed = window.slots[originalSlot]?.durabilityUsed
         newItem = addItemData(mcData, mcAssets, newItem)
       }
 
