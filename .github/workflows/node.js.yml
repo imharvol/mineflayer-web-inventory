@@ -45,9 +45,6 @@ jobs:
     - name: Install dependencies
       run: npm install
     
-    - name: Build
-      run: npm run build
-
     - name: Start tests
       run: npm test
       env:

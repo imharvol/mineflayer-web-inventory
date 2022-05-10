@@ -107,5 +107,24 @@ export const drawSlotItem = async (canvas, slot, initialSlot) => {
     )
   }
 
+  // Draw slot durability (if any)
+  if (slot.durabilityLeft != null) {
+    ctx.fillStyle = 'black'
+    ctx.fillRect(
+      slotCoordinates[0] + 3,
+      slotCoordinates[1] + 29,
+      28,
+      3
+    )
+
+    ctx.fillStyle = `hsl(${Math.round(slot.durabilityLeft * 120)}, 100%, 50%)`
+    ctx.fillRect(
+      slotCoordinates[0] + 3,
+      slotCoordinates[1] + 29,
+      Math.round(slot.durabilityLeft * 28),
+      2
+    )
+  }
+
   ctx.globalAlpha = _globalAlpha
 }

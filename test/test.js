@@ -455,6 +455,49 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
     furnace.close()
   })
 
+  // Because versions 1.12 and lower had only one wool item id for all colors
+  // and had the color coded into the item's metadata, it's best to run this test
+  it('Wool textures', async function () {
+    this.timeout(30 * 1000)
+
+    if (mcData.version['<=']('1.12.2')) {
+      bot.chat('/give test wool 3 5\n') // 3 x lime wool
+    } else {
+      bot.chat('/give test lime_wool 3\n') // 3 x lime wool
+    }
+
+    await sleep(2000)
+    assertWindow(window, 0, 'inventory')
+
+    // Check that the item's name is correct
+    if (mcData.version['<=']('1.12.2')) {
+      assertSlotMatch(bot.inventory, window, 36, 'wool', 3)
+    } else {
+      assertSlotMatch(bot.inventory, window, 36, 'lime_wool', 3)
+    }
+
+    // Check that the item's texture is correct (apparently wool's texture changed from 1.11 to 1.12)
+    if (mcData.version['<=']('1.11.2')) {
+      assert.strictEqual(window.slots[36].texture, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABsklEQVR42j2T60oDQQyF54WsvWy72213q3Vt6y8LPpciKIqiKKJQFEVBEPGG9cHifGlPf4SZzGROzkkyoXedWHHXtvyiacVVy7aeMqvee8Z5/zax4Wtu1VvP0uO65Zctq166buyz04aFzefMg6bzyvb+xjb6KPzB4L7jBiiBgOEn+2uWnTU86fAhtcCDna/CLzceU5v8DtwnC2eAuR9XjHuSsSexMwAN2gIqZx2Xgo8UzthjioctfgAFKgRyCRCG5vZBbQEe2SChe95c3VMDYgJ6ukfrVt4kq4w8VHHls4dJelJ3MGoD04Ce3fnItj/7jgx1DFZkpkbcwxQAqGNek3gfQMbUBRVHmslERtXIJUcbf5eLGqi6ao2CoA5FUQcE+rDDZ26oSVAAwdBND2teHM4ExCrqtJqE7GEdyAgdMUGv+i6qAPtMRM2cwYIu0LXARlkwGMHG2xVBqIE6wj0d867NFgyDdIo62Zk29NE+/Q3/A0vqGI+pSRBVHmm61CLvewSWbi9wbC8+e68BDyc/A9ejkZVWMuuD+fAspxIwZx7lBX4aGvVQEyYpZJR+zQXx+oT/Az0n0wHFqucAAAAASUVORK5CYII=')
+    } else {
+      assert.strictEqual(window.slots[36].texture, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAABh0lEQVQoUz3SR05DQQwG4DmGQ4Alx6L3JnqNYMddgITQu6iBFYfiGxkhjd7zeOy/eKZMdWP2MiY6MdmN5bvYeWtMn8fMRWw8x9ZLY/Q0Js5i5aEuwVg7yvJ9rD/H0c+QtffRp2jhJuava79jneLh4xhvV9zF2yiKWp9N2aXbOPweFK8+1iKd4s2XsOTByYCuDFq3X+uxurmrKkxMGCqBlTV69j+bRRMix7IM6KR75KSKodt3vFPzFg+OCnF+GhJVaY4hYwHaNMMV/pJ2d9/7YBNjIYTNm7xZEZY1PLBXYKS+TKlARSs8qOlNkvJWr796UGQOhDm2d0YM6hyoLz1o8bgrfoqUjQoaiObHdu2ptv3fj4kDTRUFKi48lj0Bf8J6/SCQ8KMTiSmZZPEDBtJiBpUJwuMh34jqHLSjenF+6lIMNpdKqG2+K/D/YlTXt2TPaF6+BnoUUaInpRNp0GJB9aD04GuAuHwIqdg08y2SZBm/TlroLFhohS2bd6kNClRSkeedqMln+gt0aENEaxLcEwAAAABJRU5ErkJggg==')
+    }
+  })
+
+  it('Tool durability', async function () {
+    this.timeout(30 * 1000)
+
+    const damage = 15
+    if (mcData.version['<=']('1.12.2')) {
+      bot.chat('/give test minecraft:golden_pickaxe 1 15\n')
+    } else {
+      bot.chat(`/give test minecraft:golden_pickaxe{Damage:${damage}} 1\n`)
+    }
+    await sleep(2000)
+    assertWindow(window, 0, 'inventory')
+    assert.strictEqual(window.slots[36].durabilityLeft, (32 - damage) / 32)
+  })
+
   // TODO: Find another way to test unsupported windows. Using setFailStreak is really unstable
   // Opens and updates an unsupported window. The bot should receive inventory updates instead of updates from an unknown window
   // it('Unsupported window', async function () {

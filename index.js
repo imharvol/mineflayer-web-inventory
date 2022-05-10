@@ -1,4 +1,4 @@
-const { getWindowName } = require('./utils')
+const { getWindowName, addItemData } = require('./utils')
 
 const DEFAULT_VERSION = '1.16'
 
@@ -46,6 +46,18 @@ module.exports = function (bot, options = {}) {
     })
   }
 
+  // Try to load mcData
+  let mcData = require('minecraft-data')(bot.version)
+  if (!mcData) {
+    mcData = require('minecraft-assets')(DEFAULT_VERSION)
+    if (mcData) {
+      console.log(`(mineflayer-web-inventory) WARNING: Please, specify a bot.version or mineflayer-web-inventory may not work properly. Using version ${DEFAULT_VERSION} for minecraft-mcData`)
+    } else {
+      console.log('(mineflayer-web-inventory) ERROR: Couldn\'t load minecraft-mcData')
+      return
+    }
+  }
+
   // Try to load mcAssets
   let mcAssets = require('minecraft-assets')(bot.version)
   if (!mcAssets) {
@@ -61,12 +73,6 @@ module.exports = function (bot, options = {}) {
   app.use(options.webPath, express.static(path.join(__dirname, 'client', 'public')))
 
   io.on('connection', (socket) => {
-    function addTexture (item) {
-      if (!item) return item
-      item.texture = mcAssets.textureContent[item.name].texture
-      return item
-    }
-
     function emitWindow (window) {
       // Use a copy of window to avoid modifying the internal state of mineflayer
       window = Object.assign({}, window)
@@ -87,7 +93,7 @@ module.exports = function (bot, options = {}) {
 
       const slots = Object.assign({}, window.slots)
       for (const item in slots) {
-        if (slots[item]) slots[item] = addTexture(slots[item])
+        if (slots[item]) slots[item] = addItemData(mcData, mcAssets, slots[item])
       }
       windowUpdate.slots = slots
       socket.emit('window', windowUpdate)
@@ -106,6 +112,7 @@ module.exports = function (bot, options = {}) {
     }, bot.webInventory.options.windowUpdateDebounceTime)
 
     function update (slot, oldItem, newItem, window) {
+      const originalSlot = slot
       // Use copies of oldItem and newItem to avoid modifying the internal state of mineflayer
       if (oldItem) oldItem = Object.assign({}, oldItem)
       if (newItem) newItem = Object.assign({}, newItem)
@@ -128,7 +135,10 @@ module.exports = function (bot, options = {}) {
         }
       }
 
-      if (newItem) newItem = addTexture(newItem)
+      if (newItem) {
+        newItem.durabilityUsed = window.slots[originalSlot]?.durabilityUsed
+        newItem = addItemData(mcData, mcAssets, newItem)
+      }
 
       updateObject.slots[slot] = newItem
 

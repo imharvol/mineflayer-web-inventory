@@ -1,10 +1,10 @@
 {
   "name": "mineflayer-web-inventory",
-  "version": "1.7.0",
+  "version": "1.8.2",
   "description": "Web based viewer for your mineflayer bot's inventory",
   "main": "index.js",
   "scripts": {
-    "build": "cd client && npm install && npm run build",
+    "install": "cd client && npm install",
     "test": "npm run lint && mocha",
     "lint": "standard",
     "clean": "rm -rf test/server/ test/server.jar versions/"
@@ -15,7 +15,7 @@
     "express": "^4.17.1",
     "lodash": "^4.17.21",
     "minecraft-assets": "^1.6.0",
-    "minecraft-data": "^2.88.0",
+    "minecraft-data": "^3.1.1",
     "prismarine-windows": "^2.4.1",
     "socket.io": "^3.1.1",
     "vec3": "^0.1.7"
