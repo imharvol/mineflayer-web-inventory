@@ -22,7 +22,8 @@ const inventoryViewer = require('mineflayer-web-inventory')
 const bot = mineflayer.createBot({
   host: 'localhost',
   port: 25565,
-  username: 'bot'
+  username: 'bot',
+  version: '1.18.2' // Its important to set this to the server's minecraft version. Otherwise it might not load data/textures correctly
 })
 
 inventoryViewer(bot)

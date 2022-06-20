@@ -39,7 +39,7 @@ function getWindowName (window) {
 }
 
 function addItemData (mcData, mcAssets, item) {
-  if (!item) return item
+  if (!item || !mcData) return item
 
   try {
     const blockModels = JSON.parse(fs.readFileSync(path.join(mcAssets.directory, 'blocks_models.json')))
@@ -79,7 +79,7 @@ function addItemData (mcData, mcAssets, item) {
 
   // Add durability left
   let itemMaxDurability
-  if ((itemMaxDurability = mcData.itemsByName[item.name].maxDurability) && item.durabilityUsed != null) {
+  if ((itemMaxDurability = mcData.itemsByName[item.name]?.maxDurability) && item.durabilityUsed != null) {
     item.durabilityLeft = (itemMaxDurability - item.durabilityUsed) / itemMaxDurability
   }
 

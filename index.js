@@ -1,6 +1,6 @@
 const { getWindowName, addItemData } = require('./utils')
 
-const DEFAULT_VERSION = '1.16'
+const DEFAULT_VERSION = '1.18'
 
 module.exports = function (bot, options = {}) {
   options.webPath = options.webPath ?? options.path ?? '/'
@@ -15,7 +15,6 @@ module.exports = function (bot, options = {}) {
 
   const path = require('path')
   const _ = require('lodash')
-  const { callbackify } = require('util')
 
   bot.webInventory = {
     options,
@@ -53,7 +52,7 @@ module.exports = function (bot, options = {}) {
     if (mcData) {
       console.log(`(mineflayer-web-inventory) WARNING: Please, specify a bot.version or mineflayer-web-inventory may not work properly. Using version ${DEFAULT_VERSION} for minecraft-mcData`)
     } else {
-      console.log('(mineflayer-web-inventory) ERROR: Couldn\'t load minecraft-mcData')
+      console.log('(mineflayer-web-inventory) ERROR: Unable to load minecraft-mcData')
       return
     }
   }
@@ -183,7 +182,7 @@ module.exports = function (bot, options = {}) {
 
   bot.webInventory = {
     ...bot.webInventory,
-    start: callbackify(start),
-    stop: callbackify(stop)
+    start,
+    stop
   }
 }
