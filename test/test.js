@@ -21,7 +21,7 @@ const serverProperties = {
   'generate-structures': 'false'
 }
 
-const minecraftVersion = process.env.TEST_MC_VERSION ?? '1.18'
+const minecraftVersion = process.env.TEST_MC_VERSION ?? '1.19'
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -134,12 +134,12 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
     window = null
 
     // Setup a clean enviroment
-    bot.chat(`/setblock ${botPos.floored().offset(0, -1, 0).toArray().join(' ')} minecraft:dirt\n`)
-    bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:air\n`)
-    bot.chat(`/setblock ${container2Pos.toArray().join(' ')} minecraft:air\n`)
-    bot.chat('/kill @e[type=item]\n')
-    bot.chat('/clear\n')
-    bot.chat(`/tp ${botPos.toArray().join(' ')}\n`)
+    bot.chat(`/setblock ${botPos.floored().offset(0, -1, 0).toArray().join(' ')} minecraft:dirt`)
+    bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:air`)
+    bot.chat(`/setblock ${container2Pos.toArray().join(' ')} minecraft:air`)
+    bot.chat('/kill @e[type=item]')
+    bot.chat('/clear')
+    bot.chat(`/tp ${botPos.toArray().join(' ')}`)
 
     // Connect to the socket
     socket = socketioClient(`http://localhost:${inventoryViewerPort}/`).connect()
@@ -202,9 +202,9 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
   it('\'window\' Event', async function () {
     this.timeout(10 * 1000)
 
-    bot.chat('/give test pumpkin 32\n') // Slot 36
-    bot.chat('/give test melon 16\n') // Slot 37
-    bot.chat('/give test iron_helmet 1\n') // Slot 38, equipped to slot 5
+    bot.chat('/give test pumpkin 32') // Slot 36
+    bot.chat('/give test melon 16') // Slot 37
+    bot.chat('/give test iron_helmet 1') // Slot 38, equipped to slot 5
 
     await sleep(1000)
 
@@ -221,7 +221,7 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
   it('\'windowUpdate\' Event', async function () {
     this.timeout(10 * 1000)
 
-    bot.chat('/give test dirt 16\n') // Slot 36
+    bot.chat('/give test dirt 16') // Slot 36
 
     await sleep(1000)
 
@@ -233,10 +233,10 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
   it('Chest updates using moveSlotItem', async function () {
     this.timeout(30 * 1000)
 
-    bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest\n`)
+    bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest`)
 
     // Correct slot before opening the chest
-    bot.chat('/give test dirt 16\n')
+    bot.chat('/give test dirt 16')
     await sleep(2500)
     assertWindow(window, 0, 'inventory')
     assertSlotMatch(bot.inventory, window, 36, 'dirt', 16)
@@ -263,7 +263,7 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
     assertNullSlotMatch(bot.currentWindow, window, 0)
 
     // Give pumpkins while the chest is open
-    bot.chat('/give test pumpkin 32\n')
+    bot.chat('/give test pumpkin 32')
     await sleep(2000)
     assertWindow(window, bot.currentWindow?.id, 'chest')
     assertSlot(window.slots[54], 'pumpkin', 32)
@@ -285,10 +285,10 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
   it('Chest updates using deposit and withdraw', async function () {
     this.timeout(30 * 1000)
 
-    bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest\n`)
+    bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest`)
 
     // Correct slot before opening the chest
-    bot.chat('/give test dirt 16\n')
+    bot.chat('/give test dirt 16')
     await sleep(2500)
     assertWindow(window, 0, 'inventory')
     assertSlotMatch(bot.inventory, window, 36, 'dirt', 16)
@@ -315,7 +315,7 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
     assertNullSlotMatch(bot.currentWindow, window, 0)
 
     // Give pumpkins while the chest is open
-    bot.chat('/give test pumpkin 32\n')
+    bot.chat('/give test pumpkin 32')
     await sleep(2000)
     assertWindow(window, bot.currentWindow?.id, 'chest')
     assertSlotMatch(bot.currentWindow, window, 54, 'pumpkin', 32)
@@ -328,15 +328,15 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
     this.timeout(30 * 1000)
 
     if (['1.8', '1.9', '1.10', '1.11', '1.12'].includes(bot.majorVersion)) {
-      bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest\n`)
-      bot.chat(`/setblock ${container2Pos.toArray().join(' ')} minecraft:chest\n`)
+      bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest`)
+      bot.chat(`/setblock ${container2Pos.toArray().join(' ')} minecraft:chest`)
     } else {
-      bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest[facing=west,type=right]\n`)
-      bot.chat(`/setblock ${container2Pos.toArray().join(' ')} minecraft:chest[facing=west,type=left]\n`)
+      bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest[facing=west,type=right]`)
+      bot.chat(`/setblock ${container2Pos.toArray().join(' ')} minecraft:chest[facing=west,type=left]`)
     }
 
     // Correct slot before opening the double chest
-    bot.chat('/give test dirt 16\n')
+    bot.chat('/give test dirt 16')
     await sleep(2500)
     assertWindow(window, 0, 'inventory')
     assertSlotMatch(bot.inventory, window, 36, 'dirt', 16)
@@ -363,7 +363,7 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
     assertNullSlotMatch(bot.currentWindow, window, 0)
 
     // Give pumpkins while the double chest is open
-    bot.chat('/give test pumpkin 32\n')
+    bot.chat('/give test pumpkin 32')
     await sleep(2000)
     assertWindow(window, bot.currentWindow?.id, 'large-chest')
     assertSlotMatch(bot.currentWindow, window, 81, 'pumpkin', 32)
@@ -387,11 +387,11 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
   it('Furnace Updates Using Furnace\'s functions', async function () {
     this.timeout(30 * 1000)
 
-    bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:furnace\n`)
+    bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:furnace`)
 
     // Correct slots before opening the furnace
-    bot.chat('/give test coal 16\n')
-    bot.chat('/give test beef 1\n')
+    bot.chat('/give test coal 16')
+    bot.chat('/give test beef 1')
     await sleep(2500)
     assertWindow(window, 0, 'inventory')
     assertSlotMatch(bot.inventory, window, 36, 'coal', 16)
@@ -461,9 +461,9 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
     this.timeout(30 * 1000)
 
     if (mcData.version['<=']('1.12.2')) {
-      bot.chat('/give test wool 3 5\n') // 3 x lime wool
+      bot.chat('/give test wool 3 5') // 3 x lime wool
     } else {
-      bot.chat('/give test lime_wool 3\n') // 3 x lime wool
+      bot.chat('/give test lime_wool 3') // 3 x lime wool
     }
 
     await sleep(2000)
@@ -489,9 +489,9 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
 
     const damage = 15
     if (mcData.version['<=']('1.12.2')) {
-      bot.chat('/give test minecraft:golden_pickaxe 1 15\n')
+      bot.chat('/give test minecraft:golden_pickaxe 1 15')
     } else {
-      bot.chat(`/give test minecraft:golden_pickaxe{Damage:${damage}} 1\n`)
+      bot.chat(`/give test minecraft:golden_pickaxe{Damage:${damage}} 1`)
     }
     await sleep(2000)
     assertWindow(window, 0, 'inventory')
@@ -503,10 +503,10 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
   // it('Unsupported window', async function () {
   //   this.timeout(30 * 1000)
 
-  //   bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest\n`)
+  //   bot.chat(`/setblock ${container1Pos.toArray().join(' ')} minecraft:chest`)
 
   //   // Correct slots before opening the "unknown window"
-  //   bot.chat('/give test dirt 16\n')
+  //   bot.chat('/give test dirt 16')
   //   await sleep(2000)
   //   assertWindow(window, 0, 'inventory')
   //   assert.equal(window.unsupported, undefined)
@@ -527,7 +527,7 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
   //   assertSlot(window.slots[36], 'dirt', 16)
 
   //   // Correct slots after receiving items while the "unknown window" is open
-  //   bot.chat('/give test beef 1\n')
+  //   bot.chat('/give test beef 1')
   //   await sleep(2000)
   //   assertWindow(window, 0, 'inventory')
   //   assert(window.unsupported)
