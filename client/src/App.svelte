@@ -102,7 +102,7 @@
   onMount(async () => {
     // Fetch Windows Coordinates
     windowsCoordinates = await (
-      await fetch("/windows/coordinates.json")
+      await fetch("windows/coordinates.json")
     ).json();
 
     const socket = io();
