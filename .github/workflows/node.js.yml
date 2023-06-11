@@ -36,6 +36,10 @@ jobs:
           node-version: 14
           java-version: 17 
 
+        - mc-version: '1.19.4'
+          node-version: 14
+          java-version: 17 
+
     steps:
     - uses: actions/checkout@v2
 
