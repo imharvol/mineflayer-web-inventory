@@ -5,67 +5,54 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        mc-version: ['1.8.8', '1.9.4', '1.10.2', '1.11.2', '1.12.2', '1.13.2', '1.14.4', '1.15.2', '1.16.5']
-        node-version: [18]
-        java-version: [8]
-        include:
-        - mc-version: '1.17.1'
-          node-version: 18
-          java-version: 16
-          
-        - mc-version: '1.18.2'
-          node-version: 18
-          java-version: 17
-
-        - mc-version: '1.19'
-          node-version: 18
-          java-version: 17
-
-        - mc-version: '1.19.2'
-          node-version: 18
-          java-version: 17 
-
-        - mc-version: '1.19.4'
-          node-version: 18
-          java-version: 17 
-
-        - mc-version: '1.20.1'
-          node-version: 18
-          java-version: 17 
-
-        - mc-version: '1.20.2'
-          node-version: 18
-          java-version: 17 
+        mc-version:
+          [
+            "1.8.8",
+            "1.9.4",
+            "1.10.2",
+            "1.11.2",
+            "1.12.2",
+            "1.13.2",
+            "1.14.4",
+            "1.15.2",
+            "1.16.5",
+            "1.17.1",
+            "1.18.2",
+            "1.19",
+            "1.19.2",
+            "1.19.4",
+            "1.20.1",
+            "1.20.2",
+          ]
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: Use Node.js 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
 
-    - name: Use Java ${{ matrix.java-version }}
-      uses: actions/setup-java@v2
-      with:
-        distribution: 'zulu'
-        java-version: ${{ matrix.java-version }}
-    
-    - name: Install dependencies
-      run: npm install
-    
-    - name: Start tests
-      run: npm test
-      env:
-        TEST_MC_VERSION: ${{ matrix.mc-version }}
+      - name: Setup Java JDK
+        uses: actions/setup-java@v1.4.3
+        with:
+          java-version: 17
+          java-package: jre
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start tests
+        run: npm test
+        env:
+          TEST_MC_VERSION: ${{ matrix.mc-version }}
