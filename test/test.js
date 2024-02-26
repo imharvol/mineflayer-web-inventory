@@ -21,7 +21,7 @@ const serverProperties = {
   'generate-structures': 'false'
 }
 
-const minecraftVersion = process.env.TEST_MC_VERSION ?? '1.20.2'
+const minecraftVersion = process.env.TEST_MC_VERSION ?? '1.20.4'
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
