@@ -105,7 +105,9 @@
       await fetch("windows/coordinates.json")
     ).json();
 
-    const socket = io();
+    const socket = io({
+      path: window.location.pathname + 'socket.io',
+    });
 
     socket.on("window", function (_botWindow) {
       botWindow = receiveWindow(botWindow, _botWindow);
