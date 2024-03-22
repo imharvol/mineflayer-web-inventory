@@ -9,17 +9,17 @@
   const drawWindowThrottleTime = 100;
 
   let canvas;
-  let window;
+  let botWindow;
   let showJson = false;
   let showItemList = true;
 
   let windowsCoordinates;
 
-  // Draw window reactively when `window` changes
-  $: drawWindow(window);
+  // Draw window reactively when `botWindow` changes
+  $: drawWindow(botWindow);
 
-  const drawWindow = throttle(async (window) => {
-    if (!window) return;
+  const drawWindow = throttle(async (botWindow) => {
+    if (!botWindow) return;
 
     const ctx = canvas.getContext("2d");
 
@@ -33,19 +33,19 @@
 
         resolve();
       });
-      windowImage.src = `windows/${window?.type ?? "inventory"}.png`;
+      windowImage.src = `windows/${botWindow?.type ?? "inventory"}.png`;
     });
 
     // Draw slots
-    for (const slot in window.slots) {
-      if (!window.slots[slot]) continue;
+    for (const slot in botWindow.slots) {
+      if (!botWindow.slots[slot]) continue;
 
       const slotCoordinates =
-        windowsCoordinates[window.type][window.slots[slot].slot];
+        windowsCoordinates[botWindow.type][botWindow.slots[slot].slot];
 
-      if (window.slots[slot].texture && slotCoordinates) {
+      if (botWindow.slots[slot].texture && slotCoordinates) {
         const slotImage = new Image();
-        slotImage.src = window.slots[slot].texture;
+        slotImage.src = botWindow.slots[slot].texture;
 
         slotImage.onload = function () {
           // Draw slot image
@@ -59,25 +59,25 @@
           );
 
           // Draw slot count
-          if (window.slots[slot].count > 1) {
+          if (botWindow.slots[slot].count > 1) {
             ctx.font = "20px monospace";
             ctx.fillStyle = "black";
             ctx.textAlign = "end";
             ctx.fillText(
-              window.slots[slot].count,
+              botWindow.slots[slot].count,
               slotCoordinates[0] + 33,
               slotCoordinates[1] + 31
             );
             ctx.fillStyle = "white";
             ctx.fillText(
-              window.slots[slot].count,
+              botWindow.slots[slot].count,
               slotCoordinates[0] + 32,
               slotCoordinates[1] + 30
             );
           }
 
           // Draw slot durability (if any)
-          if (window.slots[slot].durabilityLeft != null) {
+          if (botWindow.slots[slot].durabilityLeft != null) {
             ctx.fillStyle = 'black';
             ctx.fillRect(
               slotCoordinates[0]+3, 
@@ -86,11 +86,11 @@
               3
             );
 
-            ctx.fillStyle = `hsl(${Math.round(window.slots[slot].durabilityLeft*120)}, 100%, 50%)`;
+            ctx.fillStyle = `hsl(${Math.round(botWindow.slots[slot].durabilityLeft*120)}, 100%, 50%)`;
             ctx.fillRect(
               slotCoordinates[0]+3, 
               slotCoordinates[1]+29, 
-              Math.round(window.slots[slot].durabilityLeft*28), 
+              Math.round(botWindow.slots[slot].durabilityLeft*28), 
               2
             );
           }
@@ -105,14 +105,16 @@
       await fetch("windows/coordinates.json")
     ).json();
 
-    const socket = io();
+    const socket = io({
+      path: window.location.pathname + 'socket.io',
+    });
 
-    socket.on("window", function (_window) {
-      window = receiveWindow(window, _window);
+    socket.on("window", function (_botWindow) {
+      botWindow = receiveWindow(botWindow, _botWindow);
     });
 
     socket.on("windowUpdate", function (_windowUpdate) {
-      window = updateWindow(window, _windowUpdate);
+      botWindow = updateWindow(botWindow, _windowUpdate);
     });
 
     // onDestroy
@@ -152,22 +154,22 @@
     {showItemList ? "Hide Item List" : "Show Item List"}
   </button>
 
-  {#if window}
-    {#if window.unsupported}
+  {#if botWindow}
+    {#if botWindow.unsupported}
       <p style="color: red;">The current window is not supported but mineflayer-web-inventory will still try to show you inventory updates</p>
     {/if}
-    <p>Current Window Id: {window.realId ?? window.id}</p>
-    <p>Current Window Type: {window.realType ?? window.type}</p>
+    <p>Current Window Id: {botWindow.realId ?? botWindow.id}</p>
+    <p>Current Window Type: {botWindow.realType ?? botWindow.type}</p>
   {/if}
 
   <!-- Lists -->
-  {#if showJson && window}
-    <pre>{JSON.stringify(window, null, 4)}</pre>
+  {#if showJson && botWindow}
+    <pre>{JSON.stringify(botWindow, null, 4)}</pre>
   {/if}
 
-  {#if showItemList && window}
+  {#if showItemList && botWindow}
     <SlotList
-      slots={Object.values(window.slots)}
+      slots={Object.values(botWindow.slots)}
       emptyMessage={"The window is empty"}
     />
   {/if}
