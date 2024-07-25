@@ -11,10 +11,10 @@ const windowNamesOrig = {
   generic_9x5: ['minecraft:generic_9x5'],
   generic_9x6: ['minecraft:generic_9x6'],
   inventory: ['minecraft:inventory'],
-  chest: ['minecraft:chest'],
+  chest: ['minecraft:chest', 'minecraft:generic_9x3'],
   'crafting-table': ['minecraft:crafting', 'minecraft:crafting_table'],
   furnace: ['minecraft:furnace'],
-  'large-chest': ['minecraft:chest']
+  'large-chest': ['minecraft:chest', 'minecraft:generic_9x6']
 }
 const windowNames = windowNamesOrig
 
