@@ -5,15 +5,15 @@ const main = async () => {
   const outputFilePath = path.join(__dirname, '..', 'public', 'windows', 'coordinates.json')
 
   const windowSlotsCoords = {
-    'generic_9x1': {},
-    'generic_9x2': {},
-    'generic_9x3': {},
-    'generic_9x4': {},
-    'generic_9x5': {},
-    'generic_9x6': {},
-    'generic_9x7': {},
-    'generic_9x8': {},
-    'generic_9x9': {},
+    generic_9x1: {},
+    generic_9x2: {},
+    generic_9x3: {},
+    generic_9x4: {},
+    generic_9x5: {},
+    generic_9x6: {},
+    generic_9x7: {},
+    generic_9x8: {},
+    generic_9x9: {},
     inventory: {},
     chest: {},
     'large-chest': {},
@@ -21,7 +21,7 @@ const main = async () => {
     furnace: {}
   }
 
-  windowSlotsCoords['generic_9x1'] = {
+  windowSlotsCoords.generic_9x1 = {
     // Container slots
     0: [15, 35],
     // Inventory slots
@@ -29,15 +29,15 @@ const main = async () => {
     18: [15, 133],
     27: [15, 169],
     // Tool bar slots
-    36: [15, 213],
+    36: [15, 213]
   }
   for (let i = 0; i < 5 * 9; i += 9) {
     for (let j = 1; j <= 8; j++) {
-      windowSlotsCoords['generic_9x1'][i + j] = [windowSlotsCoords['generic_9x1'][i][0] + 36 * j, windowSlotsCoords['generic_9x1'][i][1]]
+      windowSlotsCoords.generic_9x1[i + j] = [windowSlotsCoords.generic_9x1[i][0] + 36 * j, windowSlotsCoords.generic_9x1[i][1]]
     }
   }
 
-  windowSlotsCoords['generic_9x2'] = {
+  windowSlotsCoords.generic_9x2 = {
     // Container slots
     0: [15, 35],
     9: [15, 71],
@@ -50,11 +50,11 @@ const main = async () => {
   }
   for (let i = 0; i < 6 * 9; i += 9) {
     for (let j = 1; j <= 8; j++) {
-      windowSlotsCoords['generic_9x2'][i + j] = [windowSlotsCoords['generic_9x2'][i][0] + 36 * j, windowSlotsCoords['generic_9x2'][i][1]]
+      windowSlotsCoords.generic_9x2[i + j] = [windowSlotsCoords.generic_9x2[i][0] + 36 * j, windowSlotsCoords.generic_9x2[i][1]]
     }
   }
 
-  windowSlotsCoords['generic_9x3'] = {
+  windowSlotsCoords.generic_9x3 = {
     // Container slots
     0: [15, 35],
     9: [15, 71],
@@ -68,11 +68,11 @@ const main = async () => {
   }
   for (let i = 0; i < 7 * 9; i += 9) {
     for (let j = 1; j <= 8; j++) {
-      windowSlotsCoords['generic_9x3'][i + j] = [windowSlotsCoords['generic_9x3'][i][0] + 36 * j, windowSlotsCoords['generic_9x3'][i][1]]
+      windowSlotsCoords.generic_9x3[i + j] = [windowSlotsCoords.generic_9x3[i][0] + 36 * j, windowSlotsCoords.generic_9x3[i][1]]
     }
   }
 
-  windowSlotsCoords['generic_9x4'] = {
+  windowSlotsCoords.generic_9x4 = {
     // Container slots
     0: [15, 35],
     9: [15, 71],
@@ -87,11 +87,11 @@ const main = async () => {
   }
   for (let i = 0; i < 8 * 9; i += 9) {
     for (let j = 1; j <= 8; j++) {
-      windowSlotsCoords['generic_9x4'][i + j] = [windowSlotsCoords['generic_9x4'][i][0] + 36 * j, windowSlotsCoords['generic_9x4'][i][1]]
+      windowSlotsCoords.generic_9x4[i + j] = [windowSlotsCoords.generic_9x4[i][0] + 36 * j, windowSlotsCoords.generic_9x4[i][1]]
     }
   }
 
-  windowSlotsCoords['generic_9x5'] = {
+  windowSlotsCoords.generic_9x5 = {
     // Container slots
     0: [15, 35],
     9: [15, 71],
@@ -107,11 +107,11 @@ const main = async () => {
   }
   for (let i = 0; i < 9 * 9; i += 9) {
     for (let j = 1; j <= 8; j++) {
-      windowSlotsCoords['generic_9x5'][i + j] = [windowSlotsCoords['generic_9x5'][i][0] + 36 * j, windowSlotsCoords['generic_9x5'][i][1]]
+      windowSlotsCoords.generic_9x5[i + j] = [windowSlotsCoords.generic_9x5[i][0] + 36 * j, windowSlotsCoords.generic_9x5[i][1]]
     }
   }
 
-  windowSlotsCoords['generic_9x6'] = {
+  windowSlotsCoords.generic_9x6 = {
     // Container slots
     0: [15, 35],
     9: [15, 71],
@@ -128,7 +128,7 @@ const main = async () => {
   }
   for (let i = 0; i < 10 * 9; i += 9) {
     for (let j = 1; j <= 8; j++) {
-      windowSlotsCoords['generic_9x6'][i + j] = [windowSlotsCoords['generic_9x6'][i][0] + 36 * j, windowSlotsCoords['generic_9x6'][i][1]]
+      windowSlotsCoords.generic_9x6[i + j] = [windowSlotsCoords.generic_9x6[i][0] + 36 * j, windowSlotsCoords.generic_9x6[i][1]]
     }
   }
 
@@ -158,9 +158,9 @@ const main = async () => {
     }
   }
 
-  windowSlotsCoords.chest = windowSlotsCoords['generic_9x3'];
+  windowSlotsCoords.chest = windowSlotsCoords.generic_9x3
 
-  windowSlotsCoords['large-chest'] = windowSlotsCoords["generic_9x6"];
+  windowSlotsCoords['large-chest'] = windowSlotsCoords.generic_9x6
 
   windowSlotsCoords['crafting-table'] = {
     0: [239, 61], // Output slot
