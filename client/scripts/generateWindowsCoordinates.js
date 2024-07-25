@@ -5,11 +5,131 @@ const main = async () => {
   const outputFilePath = path.join(__dirname, '..', 'public', 'windows', 'coordinates.json')
 
   const windowSlotsCoords = {
+    generic_9x1: {},
+    generic_9x2: {},
+    generic_9x3: {},
+    generic_9x4: {},
+    generic_9x5: {},
+    generic_9x6: {},
+    generic_9x7: {},
+    generic_9x8: {},
+    generic_9x9: {},
     inventory: {},
     chest: {},
     'large-chest': {},
     'crafting-table': {},
     furnace: {}
+  }
+
+  windowSlotsCoords.generic_9x1 = {
+    // Container slots
+    0: [15, 35],
+    // Inventory slots
+    9: [15, 97],
+    18: [15, 133],
+    27: [15, 169],
+    // Tool bar slots
+    36: [15, 213]
+  }
+  for (let i = 0; i < 5 * 9; i += 9) {
+    for (let j = 1; j <= 8; j++) {
+      windowSlotsCoords.generic_9x1[i + j] = [windowSlotsCoords.generic_9x1[i][0] + 36 * j, windowSlotsCoords.generic_9x1[i][1]]
+    }
+  }
+
+  windowSlotsCoords.generic_9x2 = {
+    // Container slots
+    0: [15, 35],
+    9: [15, 71],
+    // Inventory slots
+    18: [15, 133],
+    27: [15, 169],
+    36: [15, 205],
+    // Tool bar slots
+    45: [15, 249]
+  }
+  for (let i = 0; i < 6 * 9; i += 9) {
+    for (let j = 1; j <= 8; j++) {
+      windowSlotsCoords.generic_9x2[i + j] = [windowSlotsCoords.generic_9x2[i][0] + 36 * j, windowSlotsCoords.generic_9x2[i][1]]
+    }
+  }
+
+  windowSlotsCoords.generic_9x3 = {
+    // Container slots
+    0: [15, 35],
+    9: [15, 71],
+    18: [15, 107],
+    // Inventory slots
+    27: [15, 169],
+    36: [15, 205],
+    45: [15, 241],
+    // Tool bar slots
+    54: [15, 285]
+  }
+  for (let i = 0; i < 7 * 9; i += 9) {
+    for (let j = 1; j <= 8; j++) {
+      windowSlotsCoords.generic_9x3[i + j] = [windowSlotsCoords.generic_9x3[i][0] + 36 * j, windowSlotsCoords.generic_9x3[i][1]]
+    }
+  }
+
+  windowSlotsCoords.generic_9x4 = {
+    // Container slots
+    0: [15, 35],
+    9: [15, 71],
+    18: [15, 107],
+    27: [15, 143],
+    // Inventory slots
+    36: [15, 205],
+    45: [15, 241],
+    54: [15, 277],
+    // Tool bar slots
+    63: [15, 321]
+  }
+  for (let i = 0; i < 8 * 9; i += 9) {
+    for (let j = 1; j <= 8; j++) {
+      windowSlotsCoords.generic_9x4[i + j] = [windowSlotsCoords.generic_9x4[i][0] + 36 * j, windowSlotsCoords.generic_9x4[i][1]]
+    }
+  }
+
+  windowSlotsCoords.generic_9x5 = {
+    // Container slots
+    0: [15, 35],
+    9: [15, 71],
+    18: [15, 107],
+    27: [15, 143],
+    36: [15, 179],
+    // Inventory slots
+    45: [15, 241],
+    54: [15, 277],
+    63: [15, 313],
+    // Tool bar slots
+    72: [15, 357]
+  }
+  for (let i = 0; i < 9 * 9; i += 9) {
+    for (let j = 1; j <= 8; j++) {
+      windowSlotsCoords.generic_9x5[i + j] = [windowSlotsCoords.generic_9x5[i][0] + 36 * j, windowSlotsCoords.generic_9x5[i][1]]
+    }
+  }
+
+  windowSlotsCoords.generic_9x6 = {
+    // Container slots
+    0: [15, 35],
+    9: [15, 71],
+    18: [15, 107],
+    27: [15, 143],
+    36: [15, 179],
+    45: [15, 215],
+    // Inventory slots
+    54: [15, 277],
+    63: [15, 313],
+    72: [15, 349],
+    // Tool bar slots
+    81: [15, 393]
+  }
+  for (let i = 0; i < 10 * 9; i += 9) {
+    for (let j = 1; j <= 8; j++) {
+      windowSlotsCoords.generic_9x6[i + j] = [windowSlotsCoords.generic_9x6[i][0] + 36 * j, windowSlotsCoords.generic_9x6[i][1]]
+    }
   }
 
   windowSlotsCoords.inventory = {
@@ -38,44 +158,9 @@ const main = async () => {
     }
   }
 
-  windowSlotsCoords.chest = {
-    // Chest slots
-    0: [15, 35],
-    9: [15, 71],
-    18: [15, 107],
-    // Inventory slots
-    27: [15, 169],
-    36: [15, 205],
-    45: [15, 241],
-    // Tool bar slots
-    54: [15, 285]
-  }
-  for (let i = 0; i < 7 * 9; i += 9) {
-    for (let j = 1; j <= 8; j++) {
-      windowSlotsCoords.chest[i + j] = [windowSlotsCoords.chest[i][0] + 36 * j, windowSlotsCoords.chest[i][1]]
-    }
-  }
+  windowSlotsCoords.chest = windowSlotsCoords.generic_9x3
 
-  windowSlotsCoords['large-chest'] = {
-    // Chest slots
-    0: [15, 35],
-    9: [15, 71],
-    18: [15, 107],
-    27: [15, 143],
-    36: [15, 179],
-    45: [15, 215],
-    // Inventory slots
-    54: [15, 277],
-    63: [15, 313],
-    72: [15, 349],
-    // Tool bar slots
-    81: [15, 393]
-  }
-  for (let i = 0; i < 10 * 9; i += 9) {
-    for (let j = 1; j <= 8; j++) {
-      windowSlotsCoords['large-chest'][i + j] = [windowSlotsCoords['large-chest'][i][0] + 36 * j, windowSlotsCoords['large-chest'][i][1]]
-    }
-  }
+  windowSlotsCoords['large-chest'] = windowSlotsCoords.generic_9x6
 
   windowSlotsCoords['crafting-table'] = {
     0: [239, 61], // Output slot
