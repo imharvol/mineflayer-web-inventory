@@ -481,8 +481,10 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
       assert.strictEqual(window.slots[36].texture, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABsklEQVR42j2T60oDQQyF54WsvWy72213q3Vt6y8LPpciKIqiKKJQFEVBEPGG9cHifGlPf4SZzGROzkkyoXedWHHXtvyiacVVy7aeMqvee8Z5/zax4Wtu1VvP0uO65Zctq166buyz04aFzefMg6bzyvb+xjb6KPzB4L7jBiiBgOEn+2uWnTU86fAhtcCDna/CLzceU5v8DtwnC2eAuR9XjHuSsSexMwAN2gIqZx2Xgo8UzthjioctfgAFKgRyCRCG5vZBbQEe2SChe95c3VMDYgJ6ukfrVt4kq4w8VHHls4dJelJ3MGoD04Ce3fnItj/7jgx1DFZkpkbcwxQAqGNek3gfQMbUBRVHmslERtXIJUcbf5eLGqi6ao2CoA5FUQcE+rDDZ26oSVAAwdBND2teHM4ExCrqtJqE7GEdyAgdMUGv+i6qAPtMRM2cwYIu0LXARlkwGMHG2xVBqIE6wj0d867NFgyDdIo62Zk29NE+/Q3/A0vqGI+pSRBVHmm61CLvewSWbi9wbC8+e68BDyc/A9ejkZVWMuuD+fAspxIwZx7lBX4aGvVQEyYpZJR+zQXx+oT/Az0n0wHFqucAAAAASUVORK5CYII=')
     } else if (mcData.version['<=']('1.19.4')) {
       assert.strictEqual(window.slots[36].texture, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAABh0lEQVQoUz3SR05DQQwG4DmGQ4Alx6L3JnqNYMddgITQu6iBFYfiGxkhjd7zeOy/eKZMdWP2MiY6MdmN5bvYeWtMn8fMRWw8x9ZLY/Q0Js5i5aEuwVg7yvJ9rD/H0c+QtffRp2jhJuava79jneLh4xhvV9zF2yiKWp9N2aXbOPweFK8+1iKd4s2XsOTByYCuDFq3X+uxurmrKkxMGCqBlTV69j+bRRMix7IM6KR75KSKodt3vFPzFg+OCnF+GhJVaY4hYwHaNMMV/pJ2d9/7YBNjIYTNm7xZEZY1PLBXYKS+TKlARSs8qOlNkvJWr796UGQOhDm2d0YM6hyoLz1o8bgrfoqUjQoaiObHdu2ptv3fj4kDTRUFKi48lj0Bf8J6/SCQ8KMTiSmZZPEDBtJiBpUJwuMh34jqHLSjenF+6lIMNpdKqG2+K/D/YlTXt2TPaF6+BnoUUaInpRNp0GJB9aD04GuAuHwIqdg08y2SZBm/TlroLFhohS2bd6kNClRSkeedqMln+gt0aENEaxLcEwAAAABJRU5ErkJggg==')
-    } else {
+    } else if (mcData.version['<']('1.21.1')) {
       assert.strictEqual(window.slots[36].texture, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAb1BMVEWGzCZ/xh5+xR18xBx8wxt7wxt6whp5wRp4wBl3vxl2vhl1vhh0vBhzvBhyuxhxuhhwuRhuuBhutxhtthhsthhrtRhqtBhpsxhoshhnsRhmsBhlrxhkrxhjrhhjrRhirRhirBhhrBhgqxhfqhheqRiQCqUtAAAAx0lEQVR42g3FWWKEIBAFwGemIcqiiLI0g6NA7n/GTP0U3vlT/VzYqH45dzXsFpAqxNo4/j35hKR4TLRFRVpPUBZ7XigmTyUQ7RkC9iz7vPTBju95vjqeXqiMdy4jx8Y1AfhdvD+dhAmA2pDzN0Oi8kLGvgSUfliYkjhy8+Fzg0OSo4e1WODQAMRLKZAyLxmd9deOq6xrTrOuhW0fySLl0cV0Dz87DdgGbSYI5eI4NJ0HAdPPHsjZBZJ506miFbHVRNOZjahF0j8SFRB3KHqPyQAAAABJRU5ErkJggg==')
+    } else {
+      assert.strictEqual(window.slots[36].texture, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAABh0lEQVQoUz3SR05DQQwG4DmGQ4Alx6L3JnqNYMddgITQu6iBFYfiGxkhjd7zeOy/eKZMdWP2MiY6MdmN5bvYeWtMn8fMRWw8x9ZLY/Q0Js5i5aEuwVg7yvJ9rD/H0c+QtffRp2jhJuava79jneLh4xhvV9zF2yiKWp9N2aXbOPweFK8+1iKd4s2XsOTByYCuDFq3X+uxurmrKkxMGCqBlTV69j+bRRMix7IM6KR75KSKodt3vFPzFg+OCnF+GhJVaY4hYwHaNMMV/pJ2d9/7YBNjIYTNm7xZEZY1PLBXYKS+TKlARSs8qOlNkvJWr796UGQOhDm2d0YM6hyoLz1o8bgrfoqUjQoaiObHdu2ptv3fj4kDTRUFKi48lj0Bf8J6/SCQ8KMTiSmZZPEDBtJiBpUJwuMh34jqHLSjenF+6lIMNpdKqG2+K/D/YlTXt2TPaF6+BnoUUaInpRNp0GJB9aD04GuAuHwIqdg08y2SZBm/TlroLFhohS2bd6kNClRSkeedqMln+gt0aENEaxLcEwAAAABJRU5ErkJggg==')
     }
   })
 
@@ -492,8 +494,10 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
     const damage = 15
     if (mcData.version['<=']('1.12.2')) {
       bot.chat('/give test minecraft:golden_pickaxe 1 15')
-    } else {
+    } else if (mcData.version['<']('1.20.5')) {
       bot.chat(`/give test minecraft:golden_pickaxe{Damage:${damage}} 1`)
+    } else {
+      bot.chat(`/give test minecraft:golden_pickaxe[damage=${damage}] 1`)
     }
     await sleep(2000)
     assertWindow(window, 0, 'inventory')
