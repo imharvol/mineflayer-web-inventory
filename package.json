@@ -16,6 +16,7 @@
     "lodash": "^4.17.21",
     "minecraft-assets": "^1.6.0",
     "minecraft-data": "^3.1.1",
+    "prismarine-item": "^1.16.0",
     "prismarine-windows": "^2.4.1",
     "socket.io": "^4.6.2",
     "vec3": "^0.1.7"

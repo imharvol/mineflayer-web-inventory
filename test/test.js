@@ -21,7 +21,7 @@ const serverProperties = {
   'generate-structures': 'false'
 }
 
-const minecraftVersion = process.env.TEST_MC_VERSION ?? '1.21.1'
+const minecraftVersion = process.env.TEST_MC_VERSION ?? '1.21.4'
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -103,6 +103,7 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
     console.log('TEST:', `Starting Minecraft server on localhost:${serverPort}`)
     wrap.download(minecraftVersion, jarFile, (err) => {
       if (err) throw err
+
       server.startServer(serverProperties, (err) => {
         if (err) throw err
 
@@ -111,7 +112,8 @@ describe(`mineflayer-web-inventory tests ${minecraftVersion}`, function () {
           host: 'localhost',
           port: serverPort,
           username: 'test',
-          version: minecraftVersion
+          version: minecraftVersion,
+          logErrors: true
         })
 
         // Start the inventory viewer

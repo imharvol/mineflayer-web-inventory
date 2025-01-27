@@ -37,15 +37,17 @@ jobs:
             "1.20.4",
             "1.20.6",
             "1.21.1",
+            "1.21.3",
+            "1.21.4",
           ]
 
     steps:
       - uses: actions/checkout@v2
 
-      - name: Use Node.js 18
+      - name: Use Node.js 22
         uses: actions/setup-node@v2
         with:
-          node-version: 18
+          node-version: 22
 
       - name: Setup Java JDK
         uses: actions/setup-java@v1.4.3
