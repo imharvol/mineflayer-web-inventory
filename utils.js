@@ -4,11 +4,17 @@ const fs = require('fs')
 const rawMcData = require('minecraft-data')
 
 const windowNamesOrig = {
+  generic_9x1: ['minecraft:generic_9x1'],
+  generic_9x2: ['minecraft:generic_9x2'],
+  generic_9x3: ['minecraft:generic_9x3'],
+  generic_9x4: ['minecraft:generic_9x4'],
+  generic_9x5: ['minecraft:generic_9x5'],
+  generic_9x6: ['minecraft:generic_9x6'],
   inventory: ['minecraft:inventory'],
-  chest: ['minecraft:generic_9x3', 'minecraft:chest'],
+  chest: ['minecraft:chest', 'minecraft:generic_9x3'],
   'crafting-table': ['minecraft:crafting', 'minecraft:crafting_table'],
   furnace: ['minecraft:furnace'],
-  'large-chest': ['minecraft:generic_9x6', 'minecraft:chest']
+  'large-chest': ['minecraft:chest', 'minecraft:generic_9x6']
 }
 const windowNames = windowNamesOrig
 
