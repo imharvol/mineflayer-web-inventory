@@ -9,8 +9,8 @@
  */
 
 const mineflayer = require('mineflayer')
-// const inventoryViewer = require('mineflayer-web-inventory')
-const inventoryViewer = require('./index')
+const inventoryViewer = require('mineflayer-web-inventory')
+// const inventoryViewer = require('./index')
 
 if (process.argv.length > 6) {
   console.log('Usage : node example.js [<host>] [<port>] [<name>] [<password>]')
@@ -20,7 +20,6 @@ if (process.argv.length > 6) {
 const bot = mineflayer.createBot({
   host: process.argv[2] || 'localhost',
   port: parseInt(process.argv[3]) || 25565,
-  version: '1.8.9', 
   username: process.argv[4] || 'web-inventory',
   password: process.argv[5]
 })
