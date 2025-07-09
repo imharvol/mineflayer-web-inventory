@@ -128,8 +128,7 @@
   <title>mineflayer bot's inventory</title>
 </svelte:head>
 
-<main>
-  <!-- Canvas -->
+<main>  <!-- Canvas -->
   <canvas bind:this={canvas} id="windowCanvas" width="352" height="332">
     <p>
       Upgrade your browser and/or activate JavaScript to see the graphical
@@ -137,30 +136,35 @@
     </p>
   </canvas>
 
-  <!-- Buttons -->
-  <button
-    on:click={() => {
-      showJson = !showJson;
-    }}
-  >
-    {showJson ? "Hide JSON" : "Show JSON"}
-  </button>
-
-  <button
-    on:click={() => {
-      showItemList = !showItemList;
-    }}
-  >
-    {showItemList ? "Hide Item List" : "Show Item List"}
-  </button>
-
+  <!-- Window Info -->
   {#if botWindow}
     {#if botWindow.unsupported}
-      <p style="color: red;">The current window is not supported but mineflayer-web-inventory will still try to show you inventory updates</p>
+      <p style="color: #FF5555;">The current window is not supported but mineflayer-web-inventory will still try to show you inventory updates</p>
     {/if}
-    <p>Current Window Id: {botWindow.realId ?? botWindow.id}</p>
-    <p>Current Window Type: {botWindow.realType ?? botWindow.type}</p>
+    <div class="window-info">
+      <p>Current Window Id: {botWindow.realId ?? botWindow.id}</p>
+      <p>Current Window Type: {botWindow.realType ?? botWindow.type}</p>
+    </div>
   {/if}
+
+  <!-- Buttons -->
+  <div class="button-group">
+    <button
+      on:click={() => {
+        showJson = !showJson;
+      }}
+    >
+      {showJson ? "Hide JSON" : "Show JSON"}
+    </button>
+
+    <button
+      on:click={() => {
+        showItemList = !showItemList;
+      }}
+    >
+      {showItemList ? "Hide Item List" : "Show Item List"}
+    </button>
+  </div>
 
   <!-- Lists -->
   {#if showJson && botWindow}
@@ -175,12 +179,16 @@
   {/if}
 </main>
 
-<style>
-  * {
-    font-family: monospace;
+<style>  .window-info {
+    background-color: #373737;
+    padding: 8px 16px;
+    border-radius: 4px;
+    margin: 8px 0;
+    border: 2px solid #727272;
   }
 
   pre {
-    font-family: monospace;
+    max-height: 300px;
+    overflow-y: auto;
   }
 </style>

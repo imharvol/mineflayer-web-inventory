@@ -1,63 +1,81 @@
+@font-face {
+  font-family: 'Minecraft';
+  src: url('https://cdn.jsdelivr.net/npm/minecraft-font@1.0.0/font/minecraft.woff2') format('woff2'),
+       url('https://cdn.jsdelivr.net/npm/minecraft-font@1.0.0/font/minecraft.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
 html, body {
-	position: relative;
-	width: 100%;
-	height: 100%;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #2C2C2C;
+  color: #FFFFFF;
+  font-family: 'Minecraft', monospace;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-	color: #333;
-	margin: 0;
-	padding: 8px;
-	box-sizing: border-box;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-}
-
-a {
-	color: rgb(0,100,200);
-	text-decoration: none;
-}
-
-a:hover {
-	text-decoration: underline;
-}
-
-a:visited {
-	color: rgb(0,80,160);
-}
-
-label {
-	display: block;
-}
-
-input, button, select, textarea {
-	font-family: inherit;
-	font-size: inherit;
-	-webkit-padding: 0.4em 0;
-	padding: 0.4em;
-	margin: 0 0 0.5em 0;
-	box-sizing: border-box;
-	border: 1px solid #ccc;
-	border-radius: 2px;
-}
-
-input:disabled {
-	color: #ccc;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
 button {
-	color: #333;
-	background-color: #f4f4f4;
-	outline: none;
+  font-family: 'Minecraft', monospace;
+  font-size: 16px;
+  color: #FFFFFF;
+  background-color: #727272;
+  border: 2px solid #373737;
+  padding: 8px 16px;
+  margin: 4px;
+  cursor: pointer;
+  min-width: 120px;
+  text-shadow: 2px 2px #000000;
+  box-shadow: inset -2px -4px #0006, inset 2px 2px #FFF7;
+  outline: none;
 }
 
-button:disabled {
-	color: #999;
+button:hover {
+  background-color: #8B8B8B;
 }
 
-button:not(:disabled):active {
-	background-color: #ddd;
+button:active {
+  box-shadow: inset -2px -4px #0004, inset 2px 2px #FFF5;
 }
 
-button:focus {
-	border-color: #666;
+pre {
+  background-color: #373737;
+  padding: 16px;
+  border-radius: 4px;
+  font-family: 'Minecraft', monospace;
+  white-space: pre-wrap;
+  margin-top: 16px;
+}
+
+canvas {
+  image-rendering: pixelated;
+  background: #8B8B8B;
+  border: 2px solid #373737;
+  margin-bottom: 16px;
+}
+
+p {
+  text-shadow: 2px 2px #000000;
+  margin: 8px 0;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
 }

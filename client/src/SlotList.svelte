@@ -20,8 +20,33 @@
   {/if}
 </ul>
 
-<style>
-  ul {
-    list-style-type: square;
+<style>  ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 16px 0;
+    background-color: #373737;
+    border: 2px solid #727272;
+    padding: 16px;
+    border-radius: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+    padding: 8px;
+    background-color: #2C2C2C;
+    border-radius: 2px;
+  }
+
+  img {
+    image-rendering: pixelated;
+    width: 32px;
+    height: 32px;
+    background-color: #8B8B8B;
+    padding: 2px;
   }
 </style>
