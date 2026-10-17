@@ -158,15 +158,23 @@ jobs:
           cd "$dir"
           npm init -y >/dev/null
           installed=''
-          for _ in 1 2 3; do
-            if npm install "mineflayer-web-inventory@$version" >/dev/null 2>&1; then
+          # The registry processes new publishes for a few minutes before the
+          # version becomes installable, and a failed attempt poisons the npm
+          # cache with the not-found packument, so poll with a fresh cache for
+          # up to 10 minutes.
+          for attempt in $(seq 1 30); do
+            cache=$(mktemp -d)
+            if npm install "mineflayer-web-inventory@$version" --cache "$cache" --no-audit --no-fund >install.log 2>&1; then
               installed=1
               break
             fi
-            sleep 10
+            rm -rf "$cache"
+            echo "attempt $attempt: not available yet, waiting 20s..."
+            sleep 20
           done
           if [[ -z "$installed" ]]; then
             echo "::error::could not install mineflayer-web-inventory@$version from the registry"
+            tail -20 install.log
             exit 1
           fi
           node -e "
