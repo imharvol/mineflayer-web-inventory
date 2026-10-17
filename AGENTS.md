@@ -48,7 +48,9 @@ layer-specific suites when you touch their areas. Fixtures regenerate with
 
 CI shape: PRs run a 7-version E2E subset plus lint/types/tests/browser/compat/audit
 (`.github/workflows/ci.yml`); the full mineflayer-tested list runs weekly and on demand
-(`.github/workflows/weekly.yml`).
+(`.github/workflows/weekly.yml`). Releases publish from the manually dispatched
+`.github/workflows/release.yml` (npm trusted publishing, no tokens); see
+[CONTRIBUTING.md](./CONTRIBUTING.md#releasing).
 
 ## Compatibility is a hard constraint
 

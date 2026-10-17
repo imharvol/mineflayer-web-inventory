@@ -1,6 +1,6 @@
 {
   "name": "mineflayer-web-inventory",
-  "version": "2.0.0-rc.0",
+  "version": "2.0.0",
   "description": "Web based viewer for your mineflayer bot's inventory",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -50,6 +50,7 @@
     "test:browser:headed": "playwright test -c test/browser/playwright.config.ts --headed",
     "check:package": "tsdown --publint --attw",
     "prepack": "npm run build",
+    "prepublishOnly": "npm run lint && npm run typecheck && npm test",
     "clean": "rm -rf dist client/dist test/server test/browser/test-results test/browser/playwright-report"
   },
   "author": "imharvol <imharvol@gmail.com> (https://imharvol.com/)",
@@ -78,7 +79,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ImHarvol/mineflayer-web-inventory.git"
+    "url": "git+https://github.com/imharvol/mineflayer-web-inventory.git"
   },
   "sideEffects": false,
   "keywords": [

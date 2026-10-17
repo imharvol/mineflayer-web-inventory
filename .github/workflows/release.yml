@@ -1,0 +1,188 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      dist-tag:
+        description: npm dist-tag to publish under
+        type: choice
+        options: [latest, next]
+        default: latest
+      dry-run:
+        description: Run the full pipeline but skip publishing, tagging and the release
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: Pre-flight
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure this runs on master
+        run: |
+          if [[ "$GITHUB_REF" != "refs/heads/master" ]]; then
+            echo "::error::releases can only be dispatched from master (got $GITHUB_REF)"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install client dependencies
+        run: npm ci --prefix client
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit and integration tests
+        run: npm test
+
+      - name: Client unit tests
+        run: npm --prefix client test
+
+      - name: Browser smoke test
+        run: npx playwright install --with-deps chromium && npm run test:browser
+
+      - name: Package checks (publint, attw)
+        run: npm run check:package
+
+      - name: Pack and compatibility suite
+        run: npm run test:compat
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev
+
+      - name: Setup Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Cache the latest Minecraft server jar
+        uses: actions/cache@v4
+        with:
+          path: test/server
+          key: minecraft-server-26.1
+
+      - name: E2E against the latest Minecraft
+        run: npm run test:e2e
+        env:
+          TEST_MC_VERSION: '26.1'
+
+  publish:
+    name: Publish to npm
+    needs: gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the v* tag and the GitHub release
+      id-token: write # npm trusted publishing (OIDC)
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node 24 also brings the npm CLI that trusted publishing requires.
+      - name: Use Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          # No dependency caching on purpose: caches must not feed a release.
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install client dependencies
+        run: npm ci --prefix client
+
+      - name: Pre-flight guards
+        id: preflight
+        run: |
+          version=$(node -p "require('./package.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Publishing $version as '${{ inputs.dist-tag }}' (dry-run: ${{ inputs.dry-run }})"
+          if [[ '${{ inputs.dist-tag }}' == latest && "$version" == *-* ]]; then
+            echo "::error::refusing to publish prerelease $version under the latest tag"
+            exit 1
+          fi
+          if npm view "mineflayer-web-inventory@$version" version >/dev/null 2>&1; then
+            echo "::error::$version is already published on npm"
+            exit 1
+          fi
+          if ! grep -q "^## \[$version\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '$version' section to use as release notes"
+            exit 1
+          fi
+
+      - name: Publish to npm
+        run: npm publish --tag '${{ inputs.dist-tag }}' ${{ inputs.dry-run && '--dry-run' || '' }}
+
+      - name: Tag and create the GitHub release
+        if: ${{ !inputs.dry-run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version='${{ steps.preflight.outputs.version }}'
+          awk -v v="$version" '$0 ~ "^## \\[" v "\\]" {found=1; next} found && /^## \[/ {exit} found' CHANGELOG.md > release-notes.md
+          git tag "v$version"
+          git push origin "v$version"
+          if [[ -s release-notes.md ]]; then
+            gh release create "v$version" --title "v$version" --notes-file release-notes.md
+          else
+            gh release create "v$version" --title "v$version" --generate-notes
+          fi
+
+      - name: Verify the published artifact
+        if: ${{ !inputs.dry-run }}
+        run: |
+          version='${{ steps.preflight.outputs.version }}'
+          dir=$(mktemp -d)
+          cd "$dir"
+          npm init -y >/dev/null
+          installed=''
+          for _ in 1 2 3; do
+            if npm install "mineflayer-web-inventory@$version" >/dev/null 2>&1; then
+              installed=1
+              break
+            fi
+            sleep 10
+          done
+          if [[ -z "$installed" ]]; then
+            echo "::error::could not install mineflayer-web-inventory@$version from the registry"
+            exit 1
+          fi
+          node -e "
+            const fs = require('node:fs')
+            const root = 'node_modules/mineflayer-web-inventory'
+            const required = [
+              'dist/index.cjs',
+              'dist/index.mjs',
+              'dist/index.d.ts',
+              'client/dist/index.html',
+              'client/dist/windows/coordinates.json',
+            ]
+            for (const file of required) {
+              if (!fs.existsSync(root + '/' + file)) {
+                throw new Error('the published tarball is missing ' + file)
+              }
+            }
+            if (typeof require(root) !== 'function') {
+              throw new Error('require() did not return the plugin function')
+            }
+            console.log('the published artifact installs and loads')
+          "

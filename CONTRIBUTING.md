@@ -79,3 +79,24 @@ npx tsx test/fixtures/capture.ts
 - The public API and the Socket.IO wire format are frozen: additive changes only, breaking
   changes need a major release. `npm run test:compat` enforces this against the packed
   tarball.
+
+## Releasing
+
+Releases publish from CI with npm
+[trusted publishing](https://docs.npmjs.com/trusted-publishers); no long-lived npm tokens are
+involved.
+
+1. Bump the versions (`npm version <major|minor|patch> --no-git-tag-version`, and the same in
+   `client/`) and add or rename the `CHANGELOG.md` entry for the new version with today's
+   date — the workflow refuses to publish a version without a changelog section.
+2. Commit and merge to `master`, push, and make sure CI on `master` is green.
+3. From the repository's Actions tab, run the **Release** workflow against `master`
+   (`gh workflow run release.yml`; add `-f dry-run=true` to rehearse without publishing,
+   `-f dist-tag=next` for a prerelease). `gh run watch` follows the run.
+4. The workflow gates on the full check suite plus the latest-Minecraft E2E, publishes to npm
+   with provenance, creates the `v<version>` tag and the GitHub release from the changelog
+   section, then installs the published version from the registry and verifies it loads.
+
+One-time setup lives on the package's npm settings page: a GitHub Actions trusted publisher
+(user `imharvol`, repository `mineflayer-web-inventory`, workflow `release.yml`) with direct
+`npm publish` allowed.
