@@ -94,8 +94,8 @@ involved.
    (`gh workflow run release.yml`; add `-f dry-run=true` to rehearse without publishing,
    `-f dist-tag=next` for a prerelease). `gh run watch` follows the run.
 4. The workflow gates on the full check suite plus the latest-Minecraft E2E, publishes to npm
-   with provenance, creates the `v<version>` tag and the GitHub release from the changelog
-   section, then installs the published version from the registry and verifies it loads.
+   with provenance, and creates the `v<version>` tag and the GitHub release from the changelog
+   section.
 
 One-time setup lives on the package's npm settings page: a GitHub Actions trusted publisher
 (user `imharvol`, repository `mineflayer-web-inventory`, workflow `release.yml`) with direct
