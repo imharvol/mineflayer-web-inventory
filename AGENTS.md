@@ -13,6 +13,8 @@ strict, published as a dual ESM/CJS package with type declarations; the web clie
 
 - `src/` — server modules, one responsibility each, colocated `*.test.ts`
 - `shared/messages.ts` — the Socket.IO wire types, source of truth for the frozen format
+- `shared/draw.ts` — the canvas drawing both the browser client and the server-side
+  screenshot renderer run
 - `client/` — Vite + Svelte 5 client (`client/dist` is built, never committed)
 - `test/` — `integration/` (fake bot + real server), `e2e/` (real Minecraft), `compat/`
   (packed tarball consumers), `fixtures/`, `browser/` (Playwright)
@@ -71,7 +73,7 @@ major release.
 - New runtime dependencies need strong justification; the runtime set is deliberately limited
   (express, socket.io, minecraft-data, minecraft-assets, lodash.debounce). Never import the
   `lodash` monolith — per-method packages only.
-- Client: Svelte 5 runes; DOM access only in components and `client/src/lib/draw.ts`.
+- Client: Svelte 5 runes; DOM access only in components and `client/src/lib/canvas.ts`.
 
 ## Known upstream/data gotchas (do not "fix" blindly)
 

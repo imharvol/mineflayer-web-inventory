@@ -5,6 +5,7 @@ import { loadAssets } from './assets'
 import { createItemPresenter } from './items'
 import { log } from './logger'
 import { type InventoryOptions, type ResolvedOptions, resolveOptions } from './options'
+import { createScreenshotRenderer, type ScreenshotOptions } from './screenshot'
 import { createWebServer } from './server'
 import { createWindowTracker } from './tracker'
 
@@ -16,6 +17,8 @@ export interface WebInventory {
   readonly isRunning: boolean
   start(): Promise<void>
   stop(): Promise<void>
+  /** Renders the current window to a PNG; `path` also writes it to a file. */
+  screenshot(options?: ScreenshotOptions): Promise<Buffer>
 }
 
 declare module 'mineflayer' {
@@ -33,6 +36,7 @@ export default function inventoryViewer(bot: Bot, options: InventoryOptions = {}
   const bundle = loadAssets(bot.version)
   const presenter = createItemPresenter(bundle)
   const tracker = createWindowTracker(bot, presenter, resolved.windowUpdateDebounceTime)
+  const renderer = createScreenshotRenderer(CLIENT_DIR)
   const server = createWebServer(
     { express: options.express, app: options.app, http: options.http, io: options.io },
     {
@@ -52,6 +56,7 @@ export default function inventoryViewer(bot: Bot, options: InventoryOptions = {}
     },
     start: () => server.start(),
     stop: () => server.stop(),
+    screenshot: (options) => renderer.screenshot(tracker.current, options),
   }
 
   function handleBotEnd(): void {
@@ -70,3 +75,4 @@ export default function inventoryViewer(bot: Bot, options: InventoryOptions = {}
 }
 
 export type { InventoryOptions, ResolvedOptions } from './options'
+export type { ScreenshotOptions } from './screenshot'

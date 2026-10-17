@@ -27,6 +27,8 @@ const socketPath: string = options.socketPath
 const isRunning: boolean = web.isRunning
 const startResult: Promise<void> = web.start()
 const stopResult: Promise<void> = web.stop()
+const screenshotResult: Promise<Buffer> = web.screenshot()
+const screenshotWithPath: Promise<Buffer> = web.screenshot({ path: '/tmp/inventory.png' })
 
 const inventoryOptions: InventoryOptions = { windowUpdateDebounceTime: 10 }
 
@@ -46,6 +48,8 @@ void socketPath
 void isRunning
 void startResult
 void stopResult
+void screenshotResult
+void screenshotWithPath
 void inventoryOptions
 void kind
 void viewName

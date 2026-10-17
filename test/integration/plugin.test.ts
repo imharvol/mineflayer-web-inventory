@@ -73,6 +73,7 @@ describe('inventoryViewer (plugin entry)', () => {
 
     await waitFor(() => web.isRunning)
     expect(web.isRunning).toBe(true)
+    expect(typeof web.screenshot).toBe('function')
   })
 
   it('honors startOnLoad: false and implements start/stop semantics', async () => {

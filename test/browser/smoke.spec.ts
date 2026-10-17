@@ -1,4 +1,5 @@
 import { type ChildProcessWithoutNullStreams, spawn } from 'node:child_process'
+import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { expect, type Page, test } from '@playwright/test'
 import { getFreePort } from '../integration/free-port'
@@ -103,4 +104,18 @@ test('shows custom (anvil) names in the item list and as a hover tooltip', async
 
   await page.mouse.move(box.x + box.width / 2, box.y + box.height + 20)
   await expect(page.locator('.slot-tooltip')).toHaveCount(0)
+})
+
+test('downloads the canvas as a PNG', async ({ page }) => {
+  await page.goto(`http://127.0.0.1:${port}/`)
+  await expect.poll(() => canvasHasPixels(page)).toBe(true)
+
+  const downloadPromise = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Download PNG' }).click()
+  const download = await downloadPromise
+
+  expect(download.suggestedFilename()).toBe('inventory.png')
+  const filePath = await download.path()
+  if (!filePath) throw new Error('the download has no file path')
+  expect(fs.readFileSync(filePath).subarray(0, 8).toString('hex')).toBe('89504e470d0a1a0a')
 })

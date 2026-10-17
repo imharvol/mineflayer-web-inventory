@@ -14,6 +14,20 @@ let showItemList = $state(true)
 
 const slots = $derived(botWindow ? Object.values(botWindow.slots) : [])
 
+function downloadPng(): void {
+  const canvas = document.querySelector<HTMLCanvasElement>('canvas#windowCanvas')
+  canvas?.toBlob((blob) => {
+    if (!blob) return
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.download = `${botWindow?.type ?? 'window'}.png`
+    link.href = url
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+  })
+}
+
 onMount(() => {
   const socket = connect()
 
@@ -72,6 +86,8 @@ onMount(() => {
     >
       {showItemList ? 'Hide Item List' : 'Show Item List'}
     </button>
+
+    <button onclick={downloadPng}>Download PNG</button>
   </div>
 
   {#if showJson && botWindow}

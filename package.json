@@ -1,6 +1,6 @@
 {
   "name": "mineflayer-web-inventory",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Web based viewer for your mineflayer bot's inventory",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -60,6 +60,7 @@
     "lodash.debounce": "^4.0.8",
     "minecraft-assets": "^1.19.0",
     "minecraft-data": "^3.117.0",
+    "pngjs": "^7.0.0",
     "socket.io": "^4.8.4"
   },
   "devDependencies": {
@@ -67,6 +68,7 @@
     "@biomejs/biome": "^2.5.15",
     "@playwright/test": "^1.64.1",
     "@types/node": "^22.18.0",
+    "@types/pngjs": "^6.0.5",
     "minecraft-wrap": "^1.10.0",
     "mineflayer": "^4.39.0",
     "prismarine-item": "^1.16.0",

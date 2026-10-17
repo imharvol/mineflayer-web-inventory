@@ -50,6 +50,11 @@ const window = await once(socket, 'window')
 assert.equal(window.type, 'inventory')
 assert.equal(Object.keys(window.slots).length, 46)
 
+const png = await bot.webInventory.screenshot()
+assert.equal(png.subarray(0, 8).toString('hex'), '89504e470d0a1a0a', 'screenshot must be a PNG')
+assert.equal(png.readUInt32BE(16), 352)
+assert.equal(png.readUInt32BE(20), 332)
+
 await bot.webInventory.stop()
 assert.equal(bot.webInventory.isRunning, false)
 

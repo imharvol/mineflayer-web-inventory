@@ -1,4 +1,4 @@
-import { ITEM_SIZE, type SlotPosition } from './draw'
+import { ITEM_SIZE, type SlotPosition } from '@shared/draw'
 
 export type SlotCoordinates = Record<number, SlotPosition>
 

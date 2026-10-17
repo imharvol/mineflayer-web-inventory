@@ -88,6 +88,19 @@ resolves once the listener is closed.
 
 `bot.webInventory.isRunning` reports whether the server is currently running.
 
+#### `bot.webInventory.screenshot([options])`
+
+Renders the current window to a PNG server-side — the same drawing code and assets as
+the web canvas — and resolves with it as a `Buffer`. No browser has to be connected.
+With `path`, the PNG is also written to that file:
+
+```js
+const png = await bot.webInventory.screenshot({ path: 'inventory.png' })
+```
+
+The image contains what the canvas draws: the window background, items, stack counts
+and durability bars. Tooltips and the item list are not part of it.
+
 ## Supported Minecraft versions
 
 Any version supported by mineflayer and `minecraft-data`, including legacy versions

@@ -1,6 +1,9 @@
 /* Plain-CJS consumer of the packed tarball: exercises the frozen contract. */
 const assert = require('node:assert/strict')
 const { EventEmitter } = require('node:events')
+const fs = require('node:fs')
+const os = require('node:os')
+const path = require('node:path')
 const { io } = require('socket.io-client')
 const plugin = require('mineflayer-web-inventory')
 const { addItemData, getWindowName } = require('mineflayer-web-inventory/utils')
@@ -119,6 +122,14 @@ async function main() {
   assert.equal(update.slots[36].name, 'dirt')
   assert.equal(update.slots[36].count, 16)
   assert.match(update.slots[36].texture, /^data:image\/png;base64,/)
+
+  const screenshotPath = path.join(os.tmpdir(), `web-inventory-screenshot-${process.pid}.png`)
+  const png = await bot.webInventory.screenshot({ path: screenshotPath })
+  assert.equal(png.subarray(0, 8).toString('hex'), '89504e470d0a1a0a', 'screenshot must be a PNG')
+  assert.equal(png.readUInt32BE(16), 352, 'inventory background width')
+  assert.equal(png.readUInt32BE(20), 332, 'inventory background height')
+  assert.ok(fs.readFileSync(screenshotPath).equals(png), 'the path option must write the PNG')
+  fs.rmSync(screenshotPath)
 
   const unsupportedPromise = once(socket, 'window')
   bot.openWindow(new FakeWindow(3, 'minecraft:hopper', 41, 5, 41))

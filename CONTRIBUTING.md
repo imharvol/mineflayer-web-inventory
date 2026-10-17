@@ -57,7 +57,7 @@ runs `npm run lint`. Beyond formatting:
 - `console.*` only in `src/logger.ts`; timers only in `src/debounce.ts` and
   `client/src/lib/throttle.ts`.
 - Keep I/O (files, network, timers, DOM) at module edges so the core stays unit-testable.
-- Client: Svelte 5 runes; DOM access only in components and `client/src/lib/draw.ts`.
+- Client: Svelte 5 runes; DOM access only in components and `client/src/lib/canvas.ts`.
 - Comments explain *why* (quirks, constraints, workarounds), never *what*; no TODOs or
   commented-out code.
 

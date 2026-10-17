@@ -1,4 +1,4 @@
-import type { Coordinates } from './draw'
+import type { Coordinates } from '@shared/draw'
 
 export type { Coordinates }
 

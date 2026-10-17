@@ -3,12 +3,11 @@ import type { WindowMessage } from '@shared/messages'
 import { onDestroy } from 'svelte'
 import {
   type Coordinates,
-  createCanvasContext,
   createGuardedContext,
   drawWindow,
   ITEM_SIZE,
-  loadImage,
-} from '../lib/draw'
+} from '@shared/draw'
+import { createCanvasContext, loadImage } from '../lib/canvas'
 import { findSlotAt } from '../lib/hitTest'
 import { itemLabel } from '../lib/text'
 import { createThrottle } from '../lib/throttle'
