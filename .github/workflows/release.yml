@@ -180,20 +180,29 @@ jobs:
           node -e "
             const fs = require('node:fs')
             const root = 'node_modules/mineflayer-web-inventory'
-            const required = [
-              'dist/index.cjs',
-              'dist/index.mjs',
-              'dist/index.d.ts',
-              'client/dist/index.html',
-              'client/dist/windows/coordinates.json',
-            ]
-            for (const file of required) {
-              if (!fs.existsSync(root + '/' + file)) {
-                throw new Error('the published tarball is missing ' + file)
+            const pkg = require('./' + root + '/package.json')
+            const files = new Set()
+            const collect = (value) => {
+              if (typeof value === 'string') {
+                if (value.startsWith('./')) files.add(value)
+              } else if (value && typeof value === 'object') {
+                for (const nested of Object.values(value)) collect(nested)
               }
             }
-            if (typeof require(root) !== 'function') {
+            for (const field of ['main', 'module', 'types']) collect(pkg[field])
+            collect(pkg.exports)
+            for (const file of files) {
+              if (!fs.existsSync(root + '/' + file)) {
+                throw new Error('the manifest points at a missing file: ' + file)
+              }
+            }
+            for (const asset of ['client/dist/index.html', 'client/dist/windows/coordinates.json']) {
+              if (!fs.existsSync(root + '/' + asset)) {
+                throw new Error('the published tarball is missing ' + asset)
+              }
+            }
+            if (typeof require('./' + root) !== 'function') {
               throw new Error('require() did not return the plugin function')
             }
-            console.log('the published artifact installs and loads')
+            console.log('published artifact ok:', files.size, 'manifest files + client assets verified')
           "
