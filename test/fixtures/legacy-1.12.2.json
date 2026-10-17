@@ -1,0 +1,109 @@
+{
+  "version": {
+    "minecraftVersion": "1.12.2",
+    "isLegacy": true
+  },
+  "itemsByName": {
+    "wool": {},
+    "golden_pickaxe": {
+      "maxDurability": 32
+    },
+    "dirt": {}
+  },
+  "blocksByName": {
+    "wool": {
+      "variations": [
+        {
+          "metadata": 0,
+          "displayName": "White Wool"
+        },
+        {
+          "metadata": 1,
+          "displayName": "Orange Wool"
+        },
+        {
+          "metadata": 2,
+          "displayName": "Magenta Wool"
+        },
+        {
+          "metadata": 3,
+          "displayName": "Light blue Wool"
+        },
+        {
+          "metadata": 4,
+          "displayName": "Yellow Wool"
+        },
+        {
+          "metadata": 5,
+          "displayName": "Lime Wool"
+        },
+        {
+          "metadata": 6,
+          "displayName": "Pink Wool"
+        },
+        {
+          "metadata": 7,
+          "displayName": "Gray Wool"
+        },
+        {
+          "metadata": 8,
+          "displayName": "Light gray Wool"
+        },
+        {
+          "metadata": 9,
+          "displayName": "Cyan Wool"
+        },
+        {
+          "metadata": 10,
+          "displayName": "Purple Wool"
+        },
+        {
+          "metadata": 11,
+          "displayName": "Blue Wool"
+        },
+        {
+          "metadata": 12,
+          "displayName": "Brown Wool"
+        },
+        {
+          "metadata": 13,
+          "displayName": "Green Wool"
+        },
+        {
+          "metadata": 14,
+          "displayName": "Red Wool"
+        },
+        {
+          "metadata": 15,
+          "displayName": "Black Wool"
+        }
+      ]
+    }
+  },
+  "textureContent": {
+    "wool": {
+      "name": "wool",
+      "texture": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAABhUlEQVQoFT3SiW7CQAxFUf//13VlL5ASlhTEkgKBBKqeMBJoBB4vz9ceYjCZTvO8O/rqjyer9fpUVcNpNv6e7cvy93h67w96X+P1duswPgfDKDab3aH8e3wu16ukfLmaLZbqhVWyXzrdznBEd14UIamua95F8XO/39mb3c5VJbs8Hh1+gjyk2w5KT+dzKsvyOTA2MK0YPilHDe1QpJEwrwFU4n7t9sDg9g2m9VeVGYTC/a3XH2UZJWVS0xqSrTm8j8cwpsrmi0jjVpcLbTCOhrTNJmRXwFKOGYwXNJynS4ZWWOnhSbNxIq+bpp1BnT0AE3YXA2N0VzC+8Wirj7eSFlwu4DAYwFiu2/1B2fN9bJxoogiqeunjcLkxWrCmIaGJeVRqYks2GX6IkXQMA8YG6ZmBX3/Z1uigYIcMeQlGN48K1JWkSvJPGNnmCXcA6fEV4JGERE1CB2nRbAbmkHq73cCZlSsR26aYGSA51k8XC87wl8RKm7d9y3yujApVqJoLpXnUC/0DCvzCyMqYj0QAAAAASUVORK5CYII="
+    },
+    "dirt": {
+      "name": "dirt",
+      "texture": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA0UlEQVR42nWSsQ1CMQxEvQ4rINFR0SOBxAgpaRgA/Q3YhelAF+mi9+/nF1YS2zn7zq7v+/H7tEu31/XYbea7nw6ruM/SRYlM0HtZluEzIO+KycporsI3qzGHeSW01tpwsJukkl0MAAcV0GdyJ6AKpa/cVlZyq9SG9yFicpR4TKDipOmzMjnH525m/g6QTp5uOT8zNt2D5J68SaVyPORsYPtJxVrVjBcraHSkwDH3TUxnguyZu1pRkD1v541wpjHb0MokKkz+WWgDkDtgkfbm7wJ/9oUoq3qXqFkAAAAASUVORK5CYII="
+    },
+    "no_texture_item": {
+      "name": "no_texture_item"
+    }
+  },
+  "blockModels": {
+    "lime_wool": {
+      "parent": "block/cube_all",
+      "textures": {
+        "all": "blocks/wool_colored_lime"
+      }
+    },
+    "stone": {
+      "textures": {
+        "all": "blocks/missing_texture"
+      }
+    }
+  }
+}

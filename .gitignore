@@ -122,6 +122,9 @@ versions/
 
 launcher_accounts.json
 
-# For standard to work:
+# For tooling:
 client/node_modules/
-client/public/build/
+
+# Playwright
+test-results/
+playwright-report/

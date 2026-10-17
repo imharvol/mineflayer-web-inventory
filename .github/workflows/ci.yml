@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  checks:
+    name: Lint, types and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install client dependencies
+        run: npm ci --prefix client
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit and integration tests
+        run: npm test
+
+      - name: Client unit tests
+        run: npm --prefix client test
+
+      - name: Browser smoke test
+        run: npx playwright install --with-deps chromium && npm run test:browser
+
+      - name: Package checks (publint, attw)
+        run: npm run check:package
+
+      - name: Pack and compatibility suite
+        run: npm run test:compat
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev
+
+  e2e:
+    name: E2E (Minecraft ${{ matrix.version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      # One version per behavior boundary: oldest supported, last legacy
+      # names/textures, item flattening, modern named windows, {Damage}
+      # durability, item components, latest release.
+      matrix:
+        include:
+          - version: '1.8.8'
+            java: '21'
+          - version: '1.12.2'
+            java: '21'
+          - version: '1.13.2'
+            java: '21'
+          - version: '1.18.2'
+            java: '21'
+          - version: '1.19.4'
+            java: '21'
+          - version: '1.20.6'
+            java: '21'
+          - version: '26.1'
+            java: '25'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Java ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Minecraft server jars
+        uses: actions/cache@v4
+        with:
+          path: test/server
+          key: minecraft-server-${{ matrix.version }}
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          TEST_MC_VERSION: ${{ matrix.version }}

@@ -1,0 +1,72 @@
+name: Weekly E2E
+
+on:
+  schedule:
+    # Mondays, 03:00 UTC
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+jobs:
+  versions:
+    name: Resolve supported versions
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.list.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve the version matrix with a JDK per version
+        id: list
+        run: |
+          node -e '
+            const { testedVersions } = require("mineflayer/lib/version");
+            const matrix = testedVersions.map((version) => ({
+              version,
+              java: Number.parseInt(version, 10) >= 26 ? "25" : "21"
+            }));
+            console.log("matrix=" + JSON.stringify(matrix));
+          ' >> "$GITHUB_OUTPUT"
+
+  e2e:
+    name: E2E (Minecraft ${{ matrix.version }})
+    needs: versions
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.versions.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Java ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Minecraft server jars
+        uses: actions/cache@v4
+        with:
+          path: test/server
+          key: minecraft-server-${{ matrix.version }}
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          TEST_MC_VERSION: ${{ matrix.version }}

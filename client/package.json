@@ -1,23 +1,25 @@
 {
   "name": "mineflayer-web-inventory-frontend",
-  "version": "1.0.0",
+  "version": "2.0.0-rc.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "generateWindowsCoordinates": "node scripts/generateWindowsCoordinates.js",
-    "install": "rollup -c && npm run generateWindowsCoordinates",
-    "dev": "rollup -c -w",
-    "start": "sirv public --no-clear"
+    "generateWindowsCoordinates": "tsx scripts/generateWindowsCoordinates.ts",
+    "build": "npm run generateWindowsCoordinates && vite build",
+    "dev": "vite",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "@rollup/plugin-commonjs": "^17.0.0",
-    "@rollup/plugin-node-resolve": "^11.0.0",
-    "rollup-plugin-css-only": "^3.1.0",
-    "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-svelte": "^7.0.0",
-    "rollup-plugin-terser": "^7.0.0",
-    "svelte": "^3.0.0",
-    "rollup": "^2.3.4",
-    "lodash": "^4.17.21",
-    "sirv-cli": "^2.0.0"
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@types/node": "^22.18.0",
+    "lodash.throttle": "^4.1.1",
+    "socket.io-client": "^4.8.4",
+    "svelte": "^5.57.2",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
   }
 }

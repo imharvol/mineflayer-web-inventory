@@ -1,0 +1,30 @@
+{
+  "version": {
+    "minecraftVersion": "1.18.2",
+    "isLegacy": false
+  },
+  "itemsByName": {
+    "golden_pickaxe": {
+      "maxDurability": 32
+    }
+  },
+  "blocksByName": {},
+  "textureContent": {
+    "dirt": {
+      "name": "dirt",
+      "texture": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA0UlEQVR42nWSsQ1CMQxEvQ4rINFR0SOBxAgpaRgA/Q3YhelAF+mi9+/nF1YS2zn7zq7v+/H7tEu31/XYbea7nw6ruM/SRYlM0HtZluEzIO+KycporsI3qzGHeSW01tpwsJukkl0MAAcV0GdyJ6AKpa/cVlZyq9SG9yFicpR4TKDipOmzMjnH525m/g6QTp5uOT8zNt2D5J68SaVyPORsYPtJxVrVjBcraHSkwDH3TUxnguyZu1pRkD1v541wpjHb0MokKkz+WWgDkDtgkfbm7wJ/9oUoq3qXqFkAAAAASUVORK5CYII="
+    },
+    "pumpkin": {
+      "name": "pumpkin",
+      "texture": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA4klEQVQ4T32SsRECQQhFyQzMHFPbsAlzY63ALgyswugCLcAG7OQKWWW9z7xldwyYgz34/A/Y+7Itsud5U7/zbde9jWL3TYEXufmj/H+xgIzFsnibDj//+60GZvKDQSSmrvJFmTkhISffj+sAlZ/n0zAQXRXPDyuvq5XTflVjgTTsFnkW2qHRiwkiJmQRAERWNy8SiBslcdB1Bg3q8oMgWYqYtDPAZNnNC1WcGchMerg6Tp9frq/bQl6nOlKiQPhuCkZHlOPIRZPhEHW6I835SvtLxN3nvWtWXH0woC4mMJbP/A8u5lRrY0isZwAAAABJRU5ErkJggg=="
+    },
+    "golden_pickaxe": {
+      "name": "golden_pickaxe",
+      "texture": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAHlBMVEUAAAA/Lg4oHgtJNhWCXRbpsRXq7leJZydoTh79/3YoF0g5AAAAAXRSTlMAQObYZgAAAEpJREFUGJWNjDECwCAIA4kYqv//cNGhBqdmyx3B7Gf6ivYZZHQfhwAgn1ZmHkTpozGEeN5DTtKbAt//8E22TzChfpHire4l7epXXpivAQaNhmSeAAAAAElFTkSuQmCC"
+    },
+    "no_texture_item": {
+      "name": "no_texture_item"
+    }
+  },
+  "blockModels": {}
+}

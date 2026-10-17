@@ -1,145 +1,54 @@
-<script>
-  import { throttle } from "lodash";
-  import { onMount } from "svelte";
+<script lang="ts">
+import type { WindowMessage } from '@shared/messages'
+import { onMount } from 'svelte'
+import SlotList from './components/SlotList.svelte'
+import WindowCanvas from './components/WindowCanvas.svelte'
+import { type Coordinates, loadCoordinates } from './lib/coordinates'
+import { connect } from './lib/socket'
+import { applyUpdate, applyWindow } from './lib/windowState'
 
-  import { receiveWindow, updateWindow } from "./updateWindow";
+let botWindow = $state<WindowMessage>()
+let coordinates = $state<Coordinates>()
+let showJson = $state(false)
+let showItemList = $state(true)
 
-  import SlotList from "./SlotList.svelte";
+const slots = $derived(botWindow ? Object.values(botWindow.slots) : [])
 
-  const drawWindowThrottleTime = 100;
+onMount(() => {
+  const socket = connect()
 
-  let canvas;
-  let botWindow;
-  let showJson = false;
-  let showItemList = true;
+  socket.on('window', (message) => {
+    botWindow = applyWindow(botWindow, message)
+  })
+  socket.on('windowUpdate', (update) => {
+    if (!botWindow) return
+    botWindow = applyUpdate(botWindow, update)
+  })
 
-  let windowsCoordinates;
+  // The canvas stays blank if coordinates cannot be fetched; the rest of the UI works.
+  void loadCoordinates().then((loaded) => {
+    coordinates = loaded
+  })
 
-  // Draw window reactively when `botWindow` changes
-  $: drawWindow(botWindow);
-
-  const drawWindow = throttle(async (botWindow) => {
-    if (!botWindow) return;
-
-    const ctx = canvas.getContext("2d");
-
-    // Draw background
-    await new Promise((resolve) => {
-      const windowImage = new Image();
-      windowImage.addEventListener("load", function () {
-        canvas.width = windowImage.width;
-        canvas.height = windowImage.height;
-        ctx.drawImage(windowImage, 0, 0);
-
-        resolve();
-      });
-      windowImage.src = `windows/${botWindow?.type ?? "inventory"}.png`;
-    });
-
-    // Draw slots
-    for (const slot in botWindow.slots) {
-      if (!botWindow.slots[slot]) continue;
-
-      const slotCoordinates =
-        windowsCoordinates[botWindow.type][botWindow.slots[slot].slot];
-
-      if (botWindow.slots[slot].texture && slotCoordinates) {
-        const slotImage = new Image();
-        slotImage.src = botWindow.slots[slot].texture;
-
-        slotImage.onload = function () {
-          // Draw slot image
-          ctx.imageSmoothingEnabled = false;
-          ctx.drawImage(
-            slotImage,
-            slotCoordinates[0],
-            slotCoordinates[1],
-            32,
-            32
-          );
-
-          // Draw slot count
-          if (botWindow.slots[slot].count > 1) {
-            ctx.font = "20px monospace";
-            ctx.fillStyle = "black";
-            ctx.textAlign = "end";
-            ctx.fillText(
-              botWindow.slots[slot].count,
-              slotCoordinates[0] + 33,
-              slotCoordinates[1] + 31
-            );
-            ctx.fillStyle = "white";
-            ctx.fillText(
-              botWindow.slots[slot].count,
-              slotCoordinates[0] + 32,
-              slotCoordinates[1] + 30
-            );
-          }
-
-          // Draw slot durability (if any)
-          if (botWindow.slots[slot].durabilityLeft != null) {
-            ctx.fillStyle = 'black';
-            ctx.fillRect(
-              slotCoordinates[0]+3, 
-              slotCoordinates[1]+29, 
-              28, 
-              3
-            );
-
-            ctx.fillStyle = `hsl(${Math.round(botWindow.slots[slot].durabilityLeft*120)}, 100%, 50%)`;
-            ctx.fillRect(
-              slotCoordinates[0]+3, 
-              slotCoordinates[1]+29, 
-              Math.round(botWindow.slots[slot].durabilityLeft*28), 
-              2
-            );
-          }
-        };
-      }
-    }
-  }, drawWindowThrottleTime);
-
-  onMount(async () => {
-    // Fetch Windows Coordinates
-    windowsCoordinates = await (
-      await fetch("windows/coordinates.json")
-    ).json();
-
-    const socket = io({
-      path: window.location.pathname + 'socket.io',
-    });
-
-    socket.on("window", function (_botWindow) {
-      botWindow = receiveWindow(botWindow, _botWindow);
-    });
-
-    socket.on("windowUpdate", function (_windowUpdate) {
-      botWindow = updateWindow(botWindow, _windowUpdate);
-    });
-
-    // onDestroy
-    return () => {
-      socket.disconnect();
-    };
-  });
+  return () => {
+    socket.disconnect()
+  }
+})
 </script>
 
 <svelte:head>
   <title>mineflayer bot's inventory</title>
 </svelte:head>
 
-<main>  <!-- Canvas -->
-  <canvas bind:this={canvas} id="windowCanvas" width="352" height="332">
-    <p>
-      Upgrade your browser and/or activate JavaScript to see the graphical
-      inventory
-    </p>
-  </canvas>
+<main>
+  <WindowCanvas {botWindow} {coordinates} />
 
-  <!-- Window Info -->
   {#if botWindow}
     {#if botWindow.unsupported}
-      <p style="color: #FF5555;">The current window is not supported but mineflayer-web-inventory will still try to show you inventory updates</p>
+      <p style="color: #FF5555;">
+        The current window is not supported but mineflayer-web-inventory will still try to show you
+        inventory updates
+      </p>
     {/if}
     <div class="window-info">
       <p>Current Window Id: {botWindow.realId ?? botWindow.id}</p>
@@ -147,39 +56,35 @@
     </div>
   {/if}
 
-  <!-- Buttons -->
   <div class="button-group">
     <button
-      on:click={() => {
-        showJson = !showJson;
+      onclick={() => {
+        showJson = !showJson
       }}
     >
-      {showJson ? "Hide JSON" : "Show JSON"}
+      {showJson ? 'Hide JSON' : 'Show JSON'}
     </button>
 
     <button
-      on:click={() => {
-        showItemList = !showItemList;
+      onclick={() => {
+        showItemList = !showItemList
       }}
     >
-      {showItemList ? "Hide Item List" : "Show Item List"}
+      {showItemList ? 'Hide Item List' : 'Show Item List'}
     </button>
   </div>
 
-  <!-- Lists -->
   {#if showJson && botWindow}
     <pre>{JSON.stringify(botWindow, null, 4)}</pre>
   {/if}
 
   {#if showItemList && botWindow}
-    <SlotList
-      slots={Object.values(botWindow.slots)}
-      emptyMessage={"The window is empty"}
-    />
+    <SlotList {slots} emptyMessage={'The window is empty'} />
   {/if}
 </main>
 
-<style>  .window-info {
+<style>
+  .window-info {
     background-color: #373737;
     padding: 8px 16px;
     border-radius: 4px;
