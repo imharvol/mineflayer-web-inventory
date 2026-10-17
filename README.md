@@ -1,7 +1,8 @@
 # Mineflayer Web Inventory
 
 A simple web-based inventory viewer for [mineflayer](https://github.com/PrismarineJS/mineflayer)
-with support for **multiple types of windows, updated in real-time**.
+with support for **multiple types of windows, updated in real-time**, including custom
+(anvil) item names.
 
 [![npm version](https://badge.fury.io/js/mineflayer-web-inventory.svg)](https://badge.fury.io/js/mineflayer-web-inventory)
 

@@ -1,7 +1,7 @@
 import type { ItemView, WindowMessage, WindowUpdateMessage } from '@shared/messages'
 import type { Item } from 'prismarine-item'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { makeItem } from '../test/fixtures/items'
+import { makeItem, withCustomName } from '../test/fixtures/items'
 import { createChestWindow, createHopperWindow, FakeBot } from '../test/integration/fake-bot'
 import type { ItemPresenter } from './items'
 import { createWindowTracker, type TrackerMessage, type WindowTracker } from './tracker'
@@ -9,6 +9,7 @@ import { createWindowTracker, type TrackerMessage, type WindowTracker } from './
 interface PresentCall {
   name: string
   durabilityUsed?: number | null
+  customName?: unknown
 }
 
 function createRecordingPresenter(): ItemPresenter & { calls: PresentCall[] } {
@@ -16,7 +17,7 @@ function createRecordingPresenter(): ItemPresenter & { calls: PresentCall[] } {
   return {
     calls,
     present(item: Item | ItemView, durabilityUsed?: number | null): ItemView {
-      calls.push({ name: item.name, durabilityUsed })
+      calls.push({ name: item.name, durabilityUsed, customName: item.customName })
       const view: ItemView = { ...item, displayName: `web:${item.name}` }
       if (durabilityUsed !== undefined) view.durabilityUsed = durabilityUsed
       return view
@@ -200,6 +201,19 @@ describe('createWindowTracker', () => {
     expect(update.type).toBe('inventory')
     expect(update.slots[9]?.name).toBe('dirt')
     expect(update.slots[9]?.slot).toBe(9)
+  })
+
+  it('carries getter-backed custom names through unsupported-window updates', () => {
+    const hopper = createHopperWindow(3)
+    bot.openWindow(hopper)
+    messages.length = 0
+
+    hopper.updateSlot(5, withCustomName(makeItem({ name: 'dirt', count: 16 }), 'Excalibur'))
+    vi.advanceTimersByTime(100)
+
+    const update = asUpdate(messages[0])
+    expect(update.slots[9]?.customName).toBe('Excalibur')
+    expect(presenter.calls.at(-1)?.customName).toBe('Excalibur')
   })
 
   it('keeps listener counts stable across window open/close cycles', () => {

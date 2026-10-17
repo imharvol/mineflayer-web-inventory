@@ -2,6 +2,7 @@
  * Serves the real plugin (with a fake bot) for the Playwright smoke test.
  * Commands come in on stdin, one per line:
  *   update <slot> <name> <count>
+ *   custom <slot> <name> <count> <custom name…>
  *   clear <slot>
  *   quit
  */
@@ -47,7 +48,7 @@ class FakeBot extends EventEmitter implements TrackerBot {
   currentWindow: TrackerWindow | null = null
 }
 
-function makeItem(name: string, count: number, displayName: string): Item {
+function makeItem(name: string, count: number, displayName: string, customName?: string): Item {
   return {
     name,
     displayName,
@@ -58,6 +59,7 @@ function makeItem(name: string, count: number, displayName: string): Item {
     nbt: null,
     stackId: null,
     stackSize: 64,
+    ...(customName === undefined ? {} : { customName }),
   } as Item
 }
 
@@ -87,6 +89,15 @@ function handle(line: string): void {
     const displayName = name.charAt(0).toUpperCase() + name.slice(1)
     bot.inventory.updateSlot(Number(slot), makeItem(name, Number(count), displayName))
     console.log(`updated ${name}`)
+    return
+  }
+  if (command === 'custom') {
+    const [slot, name, count, ...customNameParts] = args
+    const customName = customNameParts.join(' ')
+    if (slot === undefined || name === undefined || count === undefined || customName === '') return
+    const displayName = name.charAt(0).toUpperCase() + name.slice(1)
+    bot.inventory.updateSlot(Number(slot), makeItem(name, Number(count), displayName, customName))
+    console.log(`custom ${name}`)
     return
   }
   if (command === 'clear') {

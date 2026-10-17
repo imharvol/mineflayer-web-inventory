@@ -1,7 +1,7 @@
 import type { SlotIndex, WindowMessage, WindowUpdateMessage, WireSlots } from '@shared/messages'
 import type { Item } from 'prismarine-item'
 import { createDebouncer } from './debounce'
-import { type ItemPresenter, readItemDurability } from './items'
+import { type ItemPresenter, readItemDurability, toItemView } from './items'
 import { log } from './logger'
 import {
   getWindowKind,
@@ -141,7 +141,7 @@ export function createWindowTracker(
       const translatedSlot = toInventorySlot(slot, window)
       const durabilityUsed = readItemDurability(window.slots[slot])
       pending.slots[translatedSlot] = newItem
-        ? presenter.present({ ...newItem, slot: translatedSlot }, durabilityUsed)
+        ? presenter.present(toItemView(newItem, { slot: translatedSlot }), durabilityUsed)
         : null
       debouncer.schedule()
       return

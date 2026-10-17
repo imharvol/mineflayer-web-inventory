@@ -11,6 +11,8 @@ export interface ItemView {
   slot: SlotIndex
   name: string
   displayName: string
+  /** Anvil-renamed items only; the raw text (may contain § formatting codes). */
+  customName?: string | null
   count: number
   texture?: string
   durabilityUsed?: number | null

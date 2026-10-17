@@ -9,6 +9,9 @@ export interface ItemPresenter {
   present(item: Item | ItemView, durabilityUsed?: number | null): ItemView
 }
 
+/** Anvil names are arbitrary user text; cap what travels on the wire. */
+export const MAX_CUSTOM_NAME_LENGTH = 128
+
 export function createItemPresenter(bundle: AssetsBundle): ItemPresenter {
   const legacy = isLegacyVersion(bundle.data)
   // Per-texture base64 cache: each texture file is read at most once per process.
@@ -16,7 +19,7 @@ export function createItemPresenter(bundle: AssetsBundle): ItemPresenter {
 
   return {
     present(item, durabilityUsed) {
-      const view: ItemView = { ...item }
+      const view = toItemView(item)
       const used =
         durabilityUsed !== undefined ? durabilityUsed : (readItemDurability(item) ?? null)
       if (durabilityUsed !== undefined) view.durabilityUsed = durabilityUsed
@@ -47,6 +50,28 @@ export function createItemPresenter(bundle: AssetsBundle): ItemPresenter {
 
       return view
     },
+  }
+}
+
+/**
+ * Copies an item for the wire. `customName` is a prototype getter on prismarine
+ * items (component or NBT backed), so a plain spread would lose it.
+ */
+export function toItemView(item: Item | ItemView, overrides: Partial<ItemView> = {}): ItemView {
+  const view: ItemView = { ...item, ...overrides }
+  const customName = readItemCustomName(item)
+  if (customName) view.customName = customName
+  return view
+}
+
+function readItemCustomName(item: Item | ItemView): string | null {
+  try {
+    const name = item.customName
+    if (typeof name !== 'string' || name.length === 0) return null
+    return name.slice(0, MAX_CUSTOM_NAME_LENGTH)
+  } catch {
+    // prismarine getters can throw on partial registries; degrade to "no name".
+    return null
   }
 }
 

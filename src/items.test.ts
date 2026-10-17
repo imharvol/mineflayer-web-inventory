@@ -2,11 +2,11 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it, vi } from 'vitest'
-import { makeItem } from '../test/fixtures/items'
+import { makeItem, withCustomName } from '../test/fixtures/items'
 import legacyFixture from '../test/fixtures/legacy-1.12.2.json'
 import modernFixture from '../test/fixtures/modern-1.18.2.json'
 import type { AssetsBundle, LegacyBlockModels, McAssets, McData } from './assets'
-import { createItemPresenter } from './items'
+import { createItemPresenter, MAX_CUSTOM_NAME_LENGTH } from './items'
 
 const fixturesDirectory = fileURLToPath(new URL('../test/fixtures/assets', import.meta.url))
 
@@ -101,6 +101,28 @@ describe('createItemPresenter (modern version)', () => {
     expect(view.durabilityUsed).toBe(3)
     expect(view.durabilityLeft).toBe((32 - 3) / 32)
   })
+
+  it('keeps an anvil custom name that a spread would lose (prototype getter)', () => {
+    const view = presenter.present(
+      withCustomName(makeItem({ name: 'diamond_sword' }), '§6Excalibur'),
+    )
+
+    expect(view.customName).toBe('§6Excalibur')
+  })
+
+  it('caps custom names at the wire limit', () => {
+    const view = presenter.present(
+      withCustomName(makeItem({ name: 'diamond_sword' }), 'x'.repeat(300)),
+    )
+
+    expect(view.customName).toBe('x'.repeat(MAX_CUSTOM_NAME_LENGTH))
+  })
+
+  it('omits customName when the item has none', () => {
+    const view = presenter.present(makeItem({ name: 'dirt' }))
+
+    expect(view).not.toHaveProperty('customName')
+  })
 })
 
 describe('createItemPresenter (legacy 1.12.2)', () => {
@@ -154,5 +176,13 @@ describe('createItemPresenter (legacy 1.12.2)', () => {
 
     expect(item.displayName).toBe('Wool')
     expect(item).not.toHaveProperty('texture')
+  })
+
+  it('keeps anvil custom names on legacy versions', () => {
+    const view = createItemPresenter(bundle).present(
+      withCustomName(makeItem({ name: 'wool', type: 35, metadata: 5 }), '§bSpecial'),
+    )
+
+    expect(view.customName).toBe('§bSpecial')
   })
 })

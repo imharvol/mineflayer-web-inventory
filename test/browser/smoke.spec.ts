@@ -79,3 +79,28 @@ test('renders the live inventory and reacts to server updates', async ({ page })
   send('clear 37')
   await expect(page.getByText('Pumpkin: 32')).not.toBeVisible()
 })
+
+test('shows custom (anvil) names in the item list and as a hover tooltip', async ({ page }) => {
+  await page.goto(`http://127.0.0.1:${port}/`)
+  await expect(page.getByText('Current Window Id: 0')).toBeVisible()
+
+  send('custom 38 diamond_sword 5 Excalibur')
+
+  await expect(page.getByText('Excalibur: 5')).toBeVisible()
+  await expect(page.getByText('Diamond_sword: 5')).not.toBeVisible()
+
+  const canvas = page.locator('canvas#windowCanvas')
+  const box = await canvas.boundingBox()
+  if (!box) throw new Error('canvas has no bounding box')
+
+  const response = await fetch(`http://127.0.0.1:${port}/windows/coordinates.json`)
+  const coordinates = (await response.json()) as Record<string, Record<string, [number, number]>>
+  const position = coordinates.inventory?.['38']
+  if (!position) throw new Error('missing slot coordinates for slot 38')
+
+  await page.mouse.move(box.x + position[0] + 16, box.y + position[1] + 16)
+  await expect(page.locator('.slot-tooltip')).toHaveText('Excalibur ×5')
+
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height + 20)
+  await expect(page.locator('.slot-tooltip')).toHaveCount(0)
+})

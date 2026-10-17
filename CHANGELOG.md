@@ -4,6 +4,14 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] — 2026-10-17
+
+### Added
+
+- Custom (anvil) item names now travel on the wire as an additive `customName`
+  field (capped at 128 characters, formatting codes kept as-is) and are shown in
+  the item list and as a hover tooltip on the inventory canvas (closes #55).
+
 ## [2.0.0] — 2026-10-17
 
 A single modernization release: TypeScript, a new client toolchain, no known

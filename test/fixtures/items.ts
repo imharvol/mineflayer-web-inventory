@@ -21,3 +21,13 @@ export function makeItem(fields: ItemFields): Item {
   }
   return item as Item
 }
+
+/** Mirrors prismarine-item: `customName` is a prototype getter, so spreads skip it. */
+export function withCustomName(item: Item, customName: string): Item {
+  const itemPrototype = {
+    get customName(): string {
+      return customName
+    },
+  }
+  return Object.assign(Object.create(itemPrototype), item) as Item
+}

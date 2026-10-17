@@ -1,5 +1,6 @@
 import type { ItemView, SlotIndex, WindowKind } from '@shared/messages'
 import type { Item } from 'prismarine-item'
+import { toItemView } from './items'
 
 /** Total slots of a single chest window: 27 chest slots + 36 player slots. */
 export const SINGLE_CHEST_SLOTS = 63
@@ -63,7 +64,7 @@ export function toInventorySlots(window: InventoryParts): Array<ItemView | null>
   const inventory = window.slots
     .slice(window.inventoryStart, window.inventoryEnd)
     .map((item): ItemView | null =>
-      item ? { ...item, slot: toInventorySlot(item.slot, window) } : null,
+      item ? toItemView(item, { slot: toInventorySlot(item.slot, window) }) : null,
     )
   return [...prefix, ...inventory]
 }

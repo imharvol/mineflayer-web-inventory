@@ -27,7 +27,7 @@ export interface DrawDeps {
 }
 
 const BACKGROUND_DIRECTORY = 'windows'
-const ITEM_SIZE = 32
+export const ITEM_SIZE = 32
 const COUNT_FONT = '20px monospace'
 const SWATCH_HEIGHT = 3
 const SWATCH_INSET = 3

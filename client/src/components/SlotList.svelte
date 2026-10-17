@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { ItemView } from '@shared/messages'
+import { itemLabel } from '../lib/text'
 
 interface Props {
   slots: Array<ItemView | null>
@@ -20,7 +21,7 @@ const isEmpty = $derived(slots.every((slot) => slot == null))
         <li>
           Slot {slot.slot}
           <img alt={slot.displayName} src={slot.texture} />
-          {slot.displayName}: {slot.count}
+          <span class:custom={slot.customName != null}>{itemLabel(slot)}: {slot.count}</span>
         </li>
       {/if}
     {/each}
@@ -56,5 +57,9 @@ const isEmpty = $derived(slots.every((slot) => slot == null))
     height: 32px;
     background-color: #8b8b8b;
     padding: 2px;
+  }
+
+  .custom {
+    font-style: italic;
   }
 </style>

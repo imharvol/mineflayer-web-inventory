@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { makeItem } from '../test/fixtures/items'
+import { makeItem, withCustomName } from '../test/fixtures/items'
 import {
   getWindowKind,
   PLAYER_PREFIX_SLOTS,
@@ -86,6 +86,18 @@ describe('toInventorySlots', () => {
 
     expect(copied).not.toBe(hopper.slots[5])
     expect(hopper.slots[5]?.slot).toBe(5)
+  })
+
+  it('carries getter-backed custom names into the copies', () => {
+    const renamed = withCustomName(makeItem({ name: 'dirt', slot: 5, count: 16 }), 'Excalibur')
+    const slots = toInventorySlots({
+      id: 7,
+      slots: Array.from({ length: 41 }, (_, index) => (index === 5 ? renamed : null)),
+      inventoryStart: 5,
+      inventoryEnd: 41,
+    })
+
+    expect(slots[PLAYER_PREFIX_SLOTS]?.customName).toBe('Excalibur')
   })
 
   it('leaves empty slots as null', () => {
