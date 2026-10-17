@@ -13,10 +13,10 @@ jobs:
     outputs:
       matrix: ${{ steps.list.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Use Node.js 22
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
 
@@ -44,15 +44,15 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.versions.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Use Node.js 22
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
 
       - name: Setup Java ${{ matrix.java }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
@@ -61,7 +61,7 @@ jobs:
         run: npm ci
 
       - name: Cache Minecraft server jars
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: test/server
           key: minecraft-server-${{ matrix.version }}
