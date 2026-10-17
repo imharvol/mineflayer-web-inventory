@@ -21,5 +21,6 @@
       "@shared/*": ["./shared/*"]
     }
   },
-  "include": ["src", "shared", "test", "*.config.ts"]
+  "include": ["src", "shared", "test", "*.config.ts"],
+  "exclude": ["node_modules", "test/compat/fixtures"]
 }

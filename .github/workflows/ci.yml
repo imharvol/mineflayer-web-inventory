@@ -36,6 +36,9 @@ jobs:
       - name: Client unit tests
         run: npm --prefix client test
 
+      - name: Build server and client
+        run: npm run build
+
       - name: Browser smoke test
         run: npx playwright install --with-deps chromium && npm run test:browser
 
