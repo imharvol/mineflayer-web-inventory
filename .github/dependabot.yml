@@ -11,6 +11,13 @@ updates:
         dependency-type: production
       development-dependencies:
         dependency-type: development
+    ignore:
+      # Major @types/node versions track Node majors, and `engines` targets
+      # Node >=22. Typechecking against newer types would hide uses of APIs
+      # that do not exist on the oldest supported Node. Bump alongside
+      # `engines.node` and the CI node-version instead.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: npm
     directory: /client
@@ -20,6 +27,9 @@ updates:
     groups:
       client-dependencies:
         patterns: ['*']
+    ignore:
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /

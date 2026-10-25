@@ -76,6 +76,10 @@ npx tsx test/fixtures/capture.ts
 - New runtime dependencies need strong justification — the runtime set is deliberately small
   (express, socket.io, minecraft-data, minecraft-assets, lodash.debounce); never the lodash
   monolith.
+- `@types/node` tracks the minimum supported Node major (`engines.node`), not the newest
+  release: typechecking against newer types would hide APIs missing on the oldest supported
+  Node. Bump it together with `engines.node` and the CI `node-version`; Dependabot ignores its
+  major updates.
 - The public API and the Socket.IO wire format are frozen: additive changes only, breaking
   changes need a major release. `npm run test:compat` enforces this against the packed
   tarball.
