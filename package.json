@@ -67,7 +67,7 @@
     "@arethetypeswrong/cli": "^0.18.5",
     "@biomejs/biome": "^2.5.15",
     "@playwright/test": "^1.64.1",
-    "@types/node": "^22.18.0",
+    "@types/node": "^26.6.5",
     "@types/pngjs": "^6.0.5",
     "minecraft-wrap": "^1.10.0",
     "mineflayer": "^4.39.0",
