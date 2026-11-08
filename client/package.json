@@ -16,10 +16,10 @@
     "@types/node": "^22.18.0",
     "lodash.throttle": "^4.1.1",
     "socket.io-client": "^4.8.4",
-    "svelte": "^5.57.2",
+    "svelte": "^5.57.3",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.5",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   }
 }
